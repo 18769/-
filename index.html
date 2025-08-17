@@ -43,10 +43,9 @@
                 this.mainTimer = 0;
                 this.levelTimer = 0;
                 this.score = { player1: 0, player2: 0 };
-                //this.images = this.createSampleImages(); // 使用示例圖片
                 this.imageList = {};
 
-                        // 類別到文件夾的映射
+                // 類別到文件夾的映射
                 this.categoryFolders = {
                     [GameCategory.GUESS_CHARACTER]: '猜人物/照片猜人物',
                     [GameCategory.GUESS_CHARACTER_CROPPED]: '猜人物/擷取照片猜人物',
@@ -67,54 +66,92 @@
                 this.initPage();
             }
 
-            async loadImageList() {
-                    try {
-                        const response = await fetch('js/image-list.json');
-                        this.imageList = await response.json();
-                        console.log('圖片列表載入完成');
-                    } catch (error) {
-                        console.error('載入圖片列表失敗:', error);
-                        this.imageList = {
-                        "猜人物/照片猜人物": ["/images/default.jpg"]
-        };
+            // 獲取基礎路徑 - 自動檢測環境
+            getBasePath() {
+                // 檢查是否在 GitHub Pages 環境
+                if (window.location.hostname.includes('github.io')) {
+                    // GitHub Pages 需要包含倉庫名稱
+                    const pathParts = window.location.pathname.split('/').filter(part => part);
+                    if (pathParts.length > 0) {
+                        return '/' + pathParts[0]; // 倉庫名稱
                     }
                 }
+                return ''; // 本地開發環境或根域名
+            }
+
+            async loadImageList() {
+                try {
+                    const basePath = this.getBasePath();
+                    const response = await fetch(`${basePath}/js/image-list.json`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    this.imageList = await response.json();
+                    console.log('圖片列表載入完成', this.imageList);
+                } catch (error) {
+                    console.error('載入圖片列表失敗:', error);
+                    
+                    // 使用備用圖片列表
+                    this.imageList = this.getDefaultImageList();
+                    console.log('使用預設圖片列表');
+                }
+            }
+
+            // 備用圖片列表
+            getDefaultImageList() {
+                const basePath = this.getBasePath();
+                return {
+                    "猜人物/照片猜人物": [
+                        `${basePath}/images/default.jpg`,
+                        `${basePath}/images/placeholder1.jpg`,
+                        `${basePath}/images/placeholder2.jpg`
+                    ],
+                    "猜人物/擷取照片猜人物": [
+                        `${basePath}/images/default.jpg`
+                    ],
+                    "猜人物/場景猜人物": [
+                        `${basePath}/images/default.jpg`
+                    ],
+                    "猜作品/人物猜作品": [
+                        `${basePath}/images/default.jpg`
+                    ],
+                    "猜品牌/猜品牌": [
+                        `${basePath}/images/default.jpg`
+                    ],
+                    "猜品牌/猜正版品牌": [
+                        `${basePath}/images/default.jpg`
+                    ],
+                    "猜品牌/子品牌猜源品牌": [
+                        `${basePath}/images/default.jpg`
+                    ],
+                    "猜品牌/品牌猜不同": [
+                        `${basePath}/images/default.jpg`
+                    ]
+                };
+            }
 
             getRandomImage(category) {
                 const folder = this.categoryFolders[category];
-                const defaultImage = '/images/default.jpg';
+                const basePath = this.getBasePath();
+                const defaultImage = `${basePath}/images/default.jpg`;
                 
                 if (!folder || !this.imageList[folder] || this.imageList[folder].length === 0) {
-                    console.warn(`沒有找到 ${category} 類別的圖片`);
+                    console.warn(`沒有找到 ${category} 類別的圖片，使用預設圖片`);
                     return defaultImage;
                 }
                 
                 const images = this.imageList[folder];
                 const randomIndex = Math.floor(Math.random() * images.length);
-                return images[randomIndex];
-            }
-
-            async showLevelImage(category) {
-                try {
-                    const imagePath = this.getRandomImage(category);
-                    
-                    // 檢查並修正路徑
-                    const correctedPath = imagePath.replace(/\/\.\.\//g, '/');
-                    
-                    const img = new Image();
-                    img.src = correctedPath;
-                    
-                    await new Promise((resolve, reject) => {
-                        img.onload = resolve;
-                        img.onerror = () => reject(new Error(`無法載入圖片: ${correctedPath}`));
-                    });
-                    
-                    document.getElementById('image-container').innerHTML = '';
-                    document.getElementById('image-container').appendChild(img);
-                } catch (error) {
-                    console.error('圖片載入失敗:', error);
-                    // 顯示預設圖片
+                let imagePath = images[randomIndex];
+                
+                // 確保路徑正確
+                if (!imagePath.startsWith('http') && !imagePath.startsWith(basePath)) {
+                    imagePath = basePath + imagePath;
                 }
+                
+                return imagePath;
             }
 
             preloadImage(url) {
@@ -125,7 +162,6 @@
                     img.src = url;
                 });
             }
-
 
             // 初始化頁面
             initPage() {
@@ -177,7 +213,7 @@
                     <!-- 頂部資訊欄 -->
                     <div class="header-bar">
                         <button class="home-btn" id="home-btn">
-                            <i class="icon-home"></i> 返回首頁
+                            返回首頁
                         </button>
                         <div class="header-info">
                             <div class="timer">總時間: <span id="main-timer">0:00</span></div>
@@ -198,12 +234,12 @@
                     <div class="action-buttons">
                         <div class="game-controls">
                             <button class="control-btn skip-btn" id="next-btn">
-                                <i class="icon-skip"></i> 跳過本關
+                                跳過本關
                             </button>
                         </div>
                         <div class="game-actions">
                             <button class="action-btn answer-btn" id="answer-btn">
-                                <i class="icon-answer"></i> 我知道答案！(+1分)
+                                我知道答案！(+1分)
                             </button>
                         </div>
                     </div>
@@ -240,7 +276,7 @@
                         <!-- 頂部導航欄 -->
                         <div class="header-bar">
                             <button class="home-btn" id="home-btn">
-                                <i class="icon-home"></i> 返回首頁
+                                返回首頁
                             </button>
                             <div class="timer">總時間: <span id="main-timer">0:00</span></div>
                         </div>
@@ -270,15 +306,15 @@
                         <div class="action-area">
                             <div class="game-controls">
                                 <button class="control-btn skip-btn" id="next-btn">
-                                    <i class="icon-skip"></i> 跳過本關
+                                    跳過本關
                                 </button>
                             </div>
                             <div class="team-actions">
                                 <button class="team-action-btn red-team" id="red-btn">
-                                    <i class="icon-team"></i> 紅隊得分
+                                    紅隊得分
                                 </button>
                                 <button class="team-action-btn blue-team" id="blue-btn">
-                                    <i class="icon-team"></i> 藍隊得分
+                                    藍隊得分
                                 </button>
                             </div>
                         </div>
@@ -333,8 +369,8 @@
                     document.getElementById('main-timer').textContent = this.formatDisplayTime(this.mainTimer);
                     
                     // 檢查遊戲結束條件
-                    if ((this.currentMode === GameMode.GRole && this.mainTimer >= 30) || // 測試用30秒，正式版改為720秒(12分鐘)
-                        (this.currentMode === GameMode.GBrand && this.mainTimer >= 1140)) { // 測試用60秒，正式版改為1140秒(19分鐘)
+                    if ((this.currentMode === GameMode.GRole && this.mainTimer >= 720) || // 12分鐘
+                        (this.currentMode === GameMode.GBrand && this.mainTimer >= 1140)) { // 19分鐘
                         this.endGame();
                     }
                 }, 1000);
@@ -356,7 +392,7 @@
                 
                 this.showLevelImage(category);
                 this.startLevelTimer();
-                this.updateLevelInfo(); // 更新關卡資訊
+                this.updateLevelInfo();
             }
 
             getCategoryName(category) {
@@ -375,51 +411,53 @@
 
             // 獲取當前題目類別
             getCurrentCategory() {
-                
-
                 if (this.currentMode === GameMode.GRole) {
-                    if ( (this.mainTimer < 15) && (this.score.player1 < 15 ))
-                     return GameCategory.GUESS_CHARACTER; // 測試用15秒，正式版改為360秒(6分鐘)
-                    else if ((this.mainTimer < 25 ) && (this.score.player1 < 22))
-                     return GameCategory.GUESS_CHARACTER_CROPPED; // 測試用25秒，正式版改為540秒(9分鐘)和15分
-                    else if ((this.mainTimer < 30 ) && (this.score.player1 < 29))
-                     return GameCategory.GUESS_CHARACTER_SCENE; // 測試用30秒，正式版改為720秒(12分鐘)和22分
-                    else if (this.score.player1 >= 29) return GameCategory.GUESS_WORK_BY_CHARACTER; // 測試用7分，正式版改為29分
+                    if ((this.mainTimer < 360) && (this.score.player1 < 15))
+                        return GameCategory.GUESS_CHARACTER; // 6分鐘
+                    else if ((this.mainTimer < 540) && (this.score.player1 < 22))
+                        return GameCategory.GUESS_CHARACTER_CROPPED; // 9分鐘和15分
+                    else if ((this.mainTimer < 720) && (this.score.player1 < 29))
+                        return GameCategory.GUESS_CHARACTER_SCENE; // 12分鐘和22分
+                    else if (this.score.player1 >= 29) 
+                        return GameCategory.GUESS_WORK_BY_CHARACTER; // 29分
                 } else {
-                    if (this.mainTimer < 420) return GameCategory.GUESS_BRAND; // 測試用20秒，正式版改為420秒(7分鐘)
-                    else if (this.mainTimer < 840) return GameCategory.GUESS_ORIGINAL_BRAND; // 測試用40秒，正式版改為840秒(14分鐘)
-                    else if (this.mainTimer < 1020) return GameCategory.GUESS_PARENT_BRAND; // 測試用50秒，正式版改為1020秒(17分鐘)
+                    if (this.mainTimer < 420) return GameCategory.GUESS_BRAND; // 7分鐘
+                    else if (this.mainTimer < 840) return GameCategory.GUESS_ORIGINAL_BRAND; // 14分鐘
+                    else if (this.mainTimer < 1020) return GameCategory.GUESS_PARENT_BRAND; // 17分鐘
                     return GameCategory.FIND_BRAND_DIFFERENCE;
                 }
                 
-                // 默認返回第一個類別
                 return GameCategory.GUESS_CHARACTER;
             }
 
             // 顯示關卡圖片
             async showLevelImage(category) {
-            const imageContainer = document.getElementById('image-container');
-            imageContainer.innerHTML = '<div class="loading">載入中...</div>';
-            
-            try {
-                const imagePath = this.getRandomImage(category);
-                console.log('嘗試載入圖片:', imagePath); // 添加日誌
+                const imageContainer = document.getElementById('image-container');
+                imageContainer.innerHTML = '<div class="loading">載入中...</div>';
                 
-                await this.preloadImage(imagePath);
-                
-                imageContainer.innerHTML = `
-                    <img src="${imagePath}" 
-                        alt="${category}" 
-                        onerror="this.src='/images/default.jpg'">
-                `;
-            } catch (error) {
-                console.error('顯示圖片失敗:', error);
-                imageContainer.innerHTML = `
-                    <div class="error">圖片載入失敗</div>
-                    <img src="/images/default.jpg" alt="默認圖片">
-                `;
+                try {
+                    const imagePath = this.getRandomImage(category);
+                    console.log('嘗試載入圖片:', imagePath);
+                    
+                    await this.preloadImage(imagePath);
+                    
+                    const basePath = this.getBasePath();
+                    const fallbackImage = `${basePath}/images/default.jpg`;
+                    
+                    imageContainer.innerHTML = `
+                        <img src="${imagePath}" 
+                            alt="${category}" 
+                            onerror="this.src='${fallbackImage}'">
+                    `;
+                } catch (error) {
+                    console.error('顯示圖片失敗:', error);
+                    const basePath = this.getBasePath();
+                    imageContainer.innerHTML = `
+                        <div class="error">圖片載入失敗，顯示預設圖片</div>
+                        <img src="${basePath}/images/default.jpg" alt="預設圖片">
+                    `;
+                }
             }
-        }
 
             // 開始關卡計時器
             startLevelTimer() {
@@ -435,12 +473,10 @@
                     else{
                         document.getElementById('level-timer').textContent = this.levelTimer+"秒  時間到";
                     }
-                    
                 };
                 
                 // 每秒更新本關時間
                 this.levelTimerInterval = setInterval(updateLevelTimer, 1000);
-                
             }
 
             // 結束遊戲
