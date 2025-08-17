@@ -95,24 +95,25 @@
             }
 
             async showLevelImage(category) {
-                const imageContainer = document.getElementById('image-container');
-                imageContainer.innerHTML = '<div class="loading">載入中...</div>';
-                
                 try {
                     const imagePath = this.getRandomImage(category);
-                    await this.preloadImage(imagePath);
                     
-                    imageContainer.innerHTML = `
-                        <img src="${imagePath}" 
-                            alt="${category}" 
-                            onerror="this.src='/images/default.jpg'">
-                    `;
+                    // 檢查並修正路徑
+                    const correctedPath = imagePath.replace(/\/\.\.\//g, '/');
+                    
+                    const img = new Image();
+                    img.src = correctedPath;
+                    
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = () => reject(new Error(`無法載入圖片: ${correctedPath}`));
+                    });
+                    
+                    document.getElementById('image-container').innerHTML = '';
+                    document.getElementById('image-container').appendChild(img);
                 } catch (error) {
-                    console.error('顯示圖片失敗:', error);
-                    imageContainer.innerHTML = `
-                        <div class="error">圖片載入失敗</div>
-                        <img src="/images/default.jpg" alt="默認圖片">
-                    `;
+                    console.error('圖片載入失敗:', error);
+                    // 顯示預設圖片
                 }
             }
 
