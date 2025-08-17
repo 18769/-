@@ -1,0 +1,151 @@
+{
+  "猜人物/照片猜人物": [
+    "/../images/game/猜人物/照片猜人物/Morty.jpg",
+    "/../images/game/猜人物/照片猜人物/Rick.jpg",
+    "/../images/game/猜人物/照片猜人物/Rob.jpg",
+    "/../images/game/猜人物/照片猜人物/夢多(愛吃鬼巧達).jpg",
+    "/../images/game/猜人物/照片猜人物/夢多.jpg",
+    "/../images/game/猜人物/照片猜人物/孟德爾.jpg",
+    "/../images/game/猜人物/照片猜人物/安倍晉三.jpg",
+    "/../images/game/猜人物/照片猜人物/宋少卿.png",
+    "/../images/game/猜人物/照片猜人物/尼古拉特斯拉.jpg",
+    "/../images/game/猜人物/照片猜人物/放火.jpg",
+    "/../images/game/猜人物/照片猜人物/李小龍.jpg",
+    "/../images/game/猜人物/照片猜人物/毛毛.jpg",
+    "/../images/game/猜人物/照片猜人物/邱吉爾.jpg",
+    "/../images/game/猜人物/照片猜人物/錫蘭.jpg",
+    "/../images/game/猜人物/照片猜人物/阿拉斯加牛蟲.png",
+    "/../images/game/猜人物/照片猜人物/陶春嬌.png",
+    "/../images/game/猜人物/照片猜人物/魯迅.jpg"
+  ],
+  "猜品牌/品牌猜不同": [
+    "/../images/game/猜品牌/品牌猜不同/Canon(右上).png",
+    "/../images/game/猜品牌/品牌猜不同/Galaxy(左上).png",
+    "/../images/game/猜品牌/品牌猜不同/Google(右上).png",
+    "/../images/game/猜品牌/品牌猜不同/Intel(左上).png",
+    "/../images/game/猜品牌/品牌猜不同/Line(左上).png",
+    "/../images/game/猜品牌/品牌猜不同/Netflix(左下).png",
+    "/../images/game/猜品牌/品牌猜不同/Photoshop(左下).png",
+    "/../images/game/猜品牌/品牌猜不同/TikTok(右下).png",
+    "/../images/game/猜品牌/品牌猜不同/Uber(左下).png",
+    "/../images/game/猜品牌/品牌猜不同/勞力士(右上).png",
+    "/../images/game/猜品牌/品牌猜不同/勞力士(左下).png",
+    "/../images/game/猜品牌/品牌猜不同/可口可樂(左上).png",
+    "/../images/game/猜品牌/品牌猜不同/百事(左上).png",
+    "/../images/game/猜品牌/品牌猜不同/鳴潮(右下).png"
+  ],
+  "猜品牌/子品牌猜源品牌": [
+    "/../images/game/猜品牌/子品牌猜源品牌/Disney.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/LINE.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/LV.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/Microsoft.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/NESTIE.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/Panasonic.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/Toyota.png",
+    "/../images/game/猜品牌/子品牌猜源品牌/光泉.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/大同.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/統一.jpg"
+  ],
+  "猜品牌/子品牌猜源品牌/Line": [
+    "/../images/game/猜品牌/子品牌猜源品牌/Line/兔兔.png",
+    "/../images/game/猜品牌/子品牌猜源品牌/Line/熊大.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/Line/莎莉.jpg"
+  ],
+  "猜品牌/子品牌猜源品牌/LV": [
+    "/../images/game/猜品牌/子品牌猜源品牌/LV/包1.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/LV/包2.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/LV/包3.jpg"
+  ],
+  "猜品牌/子品牌猜源品牌/panasonic": [
+    "/../images/game/猜品牌/子品牌猜源品牌/panasonic/吹風機.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/panasonic/電鍋.png",
+    "/../images/game/猜品牌/子品牌猜源品牌/panasonic/飲水機.jpg"
+  ],
+  "猜品牌/子品牌猜源品牌/光泉": [
+    "/../images/game/猜品牌/子品牌猜源品牌/光泉/冷泡茶.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/光泉/豆漿.png",
+    "/../images/game/猜品牌/子品牌猜源品牌/光泉/鮮奶.png"
+  ],
+  "猜品牌/子品牌猜源品牌/大同": [
+    "/../images/game/猜品牌/子品牌猜源品牌/大同/熱水壺.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/大同/電鍋.jpg"
+  ],
+  "猜品牌/子品牌猜源品牌/微軟": [
+    "/../images/game/猜品牌/子品牌猜源品牌/微軟/.NET.png",
+    "/../images/game/猜品牌/子品牌猜源品牌/微軟/C.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/微軟/windows.png",
+    "/../images/game/猜品牌/子品牌猜源品牌/微軟/xbox.png"
+  ],
+  "猜品牌/子品牌猜源品牌/統一": [
+    "/../images/game/猜品牌/子品牌猜源品牌/統一/純喫茶.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/統一/統一布丁.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/統一/飲冰室.jpg"
+  ],
+  "猜品牌/子品牌猜源品牌/迪士尼": [
+    "/../images/game/猜品牌/子品牌猜源品牌/迪士尼/唐老鴨.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/迪士尼/湯姆貓與傑利鼠.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/迪士尼/白雪公主.jpg"
+  ],
+  "猜品牌/子品牌猜源品牌/鵲巢": [
+    "/../images/game/猜品牌/子品牌猜源品牌/鵲巢/KitKat 巧克力.png",
+    "/../images/game/猜品牌/子品牌猜源品牌/鵲巢/奶粉.jpg",
+    "/../images/game/猜品牌/子品牌猜源品牌/鵲巢/檸檬茶.jpg"
+  ],
+  "猜品牌/猜品牌": [
+    "/../images/game/猜品牌/猜品牌/Adobe.jpg",
+    "/../images/game/猜品牌/猜品牌/FB_Meta.png",
+    "/../images/game/猜品牌/猜品牌/Google.png",
+    "/../images/game/猜品牌/猜品牌/Paypal.png",
+    "/../images/game/猜品牌/猜品牌/Youtube.png",
+    "/../images/game/猜品牌/猜品牌/乖乖.jpg",
+    "/../images/game/猜品牌/猜品牌/任天堂.jpg",
+    "/../images/game/猜品牌/猜品牌/台水.png",
+    "/../images/game/猜品牌/猜品牌/台鐵.png",
+    "/../images/game/猜品牌/猜品牌/台電.png",
+    "/../images/game/猜品牌/猜品牌/夯吉寶.jpg",
+    "/../images/game/猜品牌/猜品牌/寶可夢_任天堂.png",
+    "/../images/game/猜品牌/猜品牌/彰化縣縣徽.png",
+    "/../images/game/猜品牌/猜品牌/彰師大.png",
+    "/../images/game/猜品牌/猜品牌/愛迪達.jpg",
+    "/../images/game/猜品牌/猜品牌/漫威.jpg",
+    "/../images/game/猜品牌/猜品牌/義美.jpg",
+    "/../images/game/猜品牌/猜品牌/蘋果.jpg",
+    "/../images/game/猜品牌/猜品牌/麥當勞.jpg"
+  ],
+  "猜品牌/猜正版品牌/BMW": [
+    "/../images/game/猜品牌/猜正版品牌/BMW/BMW.png",
+    "/../images/game/猜品牌/猜正版品牌/BMW/BWW.png"
+  ],
+  "猜品牌/猜正版品牌": [
+    "/../images/game/猜品牌/猜正版品牌/BMW(右).png.jpg",
+    "/../images/game/猜品牌/猜正版品牌/Coca Cola(右).png",
+    "/../images/game/猜品牌/猜正版品牌/ig(左).jpg.jpg",
+    "/../images/game/猜品牌/猜正版品牌/KFC.jpg",
+    "/../images/game/猜品牌/猜正版品牌/Nike(左).png.jpg",
+    "/../images/game/猜品牌/猜正版品牌/Ps(上).png.jpg",
+    "/../images/game/猜品牌/猜正版品牌/愛迪達.jpg",
+    "/../images/game/猜品牌/猜正版品牌/星巴克(左).jpg",
+    "/../images/game/猜品牌/猜正版品牌/誰是DEJun(左).png",
+    "/../images/game/猜品牌/猜正版品牌/雷姆是誰？(右).jpg",
+    "/../images/game/猜品牌/猜正版品牌/香奈兒.jpg"
+  ],
+  "猜品牌/猜正版品牌/ig": [
+    "/../images/game/猜品牌/猜正版品牌/ig/gi.jpg",
+    "/../images/game/猜品牌/猜正版品牌/ig/ig.jpg"
+  ],
+  "猜品牌/猜正版品牌/Nike": [
+    "/../images/game/猜品牌/猜正版品牌/Nike/Like.jpg",
+    "/../images/game/猜品牌/猜正版品牌/Nike/Nike.png"
+  ],
+  "猜品牌/猜正版品牌/PS": [
+    "/../images/game/猜品牌/猜正版品牌/PS/Ps..png",
+    "/../images/game/猜品牌/猜正版品牌/PS/PS.png"
+  ],
+  "猜品牌/猜正版品牌/可口可樂": [
+    "/../images/game/猜品牌/猜正版品牌/可口可樂/可口可樂.jpg"
+  ],
+  "猜品牌/猜正版品牌/尼克星-DEjun": [
+    "/../images/game/猜品牌/猜正版品牌/尼克星-DEjun/DE jun.jpg",
+    "/../images/game/猜品牌/猜正版品牌/尼克星-DEjun/尼克星.jpg"
+  ]
+}

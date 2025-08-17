@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>猜謎遊戲</title>
+        <link href="css/GameUI.css" rel="stylesheet"/>
+</head>
+<body>
+    <div id="game-container"></div>
+
+    <script>
+        // 遊戲狀態
+        const GameState = {
+            INIT: 0,
+            PLAYING: 1,
+            END: 2
+        };
+
+        // 遊戲模式
+        const GameMode = {
+            GRole: 1,
+            GBrand: 2
+        };
+
+        // 遊戲類別
+        const GameCategory = {
+            GUESS_CHARACTER: "照片猜人物",
+            GUESS_CHARACTER_CROPPED: "擷取照片猜人物",
+            GUESS_CHARACTER_SCENE: "場景猜人物",
+            GUESS_WORK_BY_CHARACTER: "人物猜作品",
+            GUESS_BRAND: "猜品牌",
+            GUESS_ORIGINAL_BRAND: "猜正版品牌",
+            GUESS_PARENT_BRAND: "子品牌猜源品牌",
+            FIND_BRAND_DIFFERENCE: "品牌猜不同"
+        };
+
+        class Game {
+            constructor() {
+                this.state = GameState.INIT;
+                this.currentMode = null;
+                this.level = 0;
+                this.mainTimer = 0;
+                this.levelTimer = 0;
+                this.score = { player1: 0, player2: 0 };
+                //this.images = this.createSampleImages(); // 使用示例圖片
+                this.imageList = {};
+
+                        // 類別到文件夾的映射
+                this.categoryFolders = {
+                    [GameCategory.GUESS_CHARACTER]: '猜人物/照片猜人物',
+                    [GameCategory.GUESS_CHARACTER_CROPPED]: '猜人物/擷取照片猜人物',
+                    [GameCategory.GUESS_CHARACTER_SCENE]: '猜人物/場景猜人物',
+                    [GameCategory.GUESS_WORK_BY_CHARACTER]: '猜作品/人物猜作品',
+                    [GameCategory.GUESS_BRAND]: '猜品牌/猜品牌',
+                    [GameCategory.GUESS_ORIGINAL_BRAND]: '猜品牌/猜正版品牌',
+                    [GameCategory.GUESS_PARENT_BRAND]: '猜品牌/子品牌猜源品牌',
+                    [GameCategory.FIND_BRAND_DIFFERENCE]: '猜品牌/品牌猜不同'
+                };
+
+                this.loadImageList();
+
+                this.mainTimerInterval = null;
+                this.levelTimeout = null;
+                
+                // 初始化遊戲
+                this.initPage();
+            }
+
+            async loadImageList() {
+                    try {
+                        const response = await fetch('js/image-list.json');
+                        this.imageList = await response.json();
+                        console.log('圖片列表載入完成');
+                    } catch (error) {
+                        console.error('載入圖片列表失敗:', error);
+                        this.imageList = {
+                        "猜人物/照片猜人物": ["/images/default.jpg"]
+        };
+                    }
+                }
+
+            getRandomImage(category) {
+                const folder = this.categoryFolders[category];
+                const defaultImage = '/images/default.jpg';
+                
+                if (!folder || !this.imageList[folder] || this.imageList[folder].length === 0) {
+                    console.warn(`沒有找到 ${category} 類別的圖片`);
+                    return defaultImage;
+                }
+                
+                const images = this.imageList[folder];
+                const randomIndex = Math.floor(Math.random() * images.length);
+                return images[randomIndex];
+            }
+
+            async showLevelImage(category) {
+                const imageContainer = document.getElementById('image-container');
+                imageContainer.innerHTML = '<div class="loading">載入中...</div>';
+                
+                try {
+                    const imagePath = this.getRandomImage(category);
+                    await this.preloadImage(imagePath);
+                    
+                    imageContainer.innerHTML = `
+                        <img src="${imagePath}" 
+                            alt="${category}" 
+                            onerror="this.src='/images/default.jpg'">
+                    `;
+                } catch (error) {
+                    console.error('顯示圖片失敗:', error);
+                    imageContainer.innerHTML = `
+                        <div class="error">圖片載入失敗</div>
+                        <img src="/images/default.jpg" alt="默認圖片">
+                    `;
+                }
+            }
+
+            preloadImage(url) {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(url);
+                    img.onerror = () => reject(new Error(`圖片載入失敗: ${url}`));
+                    img.src = url;
+                });
+            }
+
+
+            // 初始化頁面
+            initPage() {
+                this.state = GameState.INIT;
+                const container = document.getElementById('game-container');
+                container.innerHTML = `
+                    <h1 style="margin-bottom: 30px; font-size: 32px;">迎新遊戲</h1>
+                    <div class="mode-selection">
+                        <button class="mode-btn" data-mode="${GameMode.GRole}">猜人物</button>
+                        <button class="mode-btn" data-mode="${GameMode.GBrand}">猜品牌</button>
+                    </div>
+                `;
+                
+                // 添加事件監聽器
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.currentMode = parseInt(e.target.dataset.mode);
+                        this.startGame();
+                    });
+                });
+            }
+
+            // 開始遊戲
+            startGame() {
+                this.state = GameState.PLAYING;
+                this.level = 0;
+                this.mainTimer = 0;
+                this.score = { player1: 0, player2: 0 };
+                
+                // 根據模式初始化UI
+                if (this.currentMode === GameMode.GRole) {
+                    this.setupSinglePlayerUI();
+                } else {
+                    this.setupMultiPlayerUI();
+                }
+                
+                // 開始主計時器
+                this.startMainTimer();
+                
+                // 進入第一關
+                this.nextLevel();
+            }
+
+            // 單人模式UI設置
+            setupSinglePlayerUI() {
+                const container = document.getElementById('game-container');
+                container.innerHTML = `
+                    <div class="game-ui">
+                    <!-- 頂部資訊欄 -->
+                    <div class="header-bar">
+                        <button class="home-btn" id="home-btn">
+                            <i class="icon-home"></i> 返回首頁
+                        </button>
+                        <div class="header-info">
+                            <div class="timer">總時間: <span id="main-timer">0:00</span></div>
+                            <div class="score-display">分數: <span id="score">0</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 關卡資訊區 -->
+                    <div class="level-info">
+                        <div class="level-title">關卡主題: <span id="current-category"></span></div>
+                        <div class="level-timer"><BR>本關剩餘: <span id="level-timer">10</span></div>
+                    </div>
+                    
+                    <!-- 圖片顯示區 -->
+                    <div class="image-container" id="image-container"></div>
+                    
+                    <!-- 操作按鈕區 -->
+                    <div class="action-buttons">
+                        <div class="game-controls">
+                            <button class="control-btn skip-btn" id="next-btn">
+                                <i class="icon-skip"></i> 跳過本關
+                            </button>
+                        </div>
+                        <div class="game-actions">
+                            <button class="action-btn answer-btn" id="answer-btn">
+                                <i class="icon-answer"></i> 我知道答案！(+1分)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+                
+                // 得分按鈕事件
+                document.getElementById('answer-btn').addEventListener('click', () => {
+                    this.score.player1 += 1;
+                    document.getElementById('score').textContent = this.score.player1;
+                    this.nextLevel();
+                });
+                
+                // 下一關按鈕事件
+                document.getElementById('next-btn').addEventListener('click', () => {
+                    this.nextLevel();
+                });
+                
+                document.getElementById('home-btn').addEventListener('click', () => {
+                if (confirm('確定要放棄當前遊戲返回首頁嗎？')) {
+                    this.initPage();
+                }
+});
+
+                // 初始化顯示
+                this.updateLevelInfo();
+            }
+
+            // 雙人模式UI設置
+            setupMultiPlayerUI() {
+                const container = document.getElementById('game-container');
+                container.innerHTML = `
+                    <div class="game-ui multiplayer">
+                        <!-- 頂部導航欄 -->
+                        <div class="header-bar">
+                            <button class="home-btn" id="home-btn">
+                                <i class="icon-home"></i> 返回首頁
+                            </button>
+                            <div class="timer">總時間: <span id="main-timer">0:00</span></div>
+                        </div>
+                        
+                        <!-- 隊伍分數顯示 -->
+                        <div class="team-score-display">
+                            <div class="team-score red-team">
+                                <div class="team-name">紅隊</div>
+                                <div class="score-value" id="red-score">0</div>
+                            </div>
+                            <div class="team-score blue-team">
+                                <div class="team-name">藍隊</div>
+                                <div class="score-value" id="blue-score">0</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 關卡資訊區 -->
+                        <div class="level-info">
+                            <div class="level-title">關卡主題: <span id="current-category"></span></div>
+                            <div class="level-timer"><BR>本關剩餘: <span id="level-timer">10</span></div>
+                        </div>
+                        
+                        <!-- 圖片顯示區 -->
+                        <div class="image-container" id="image-container"></div>
+                        
+                        <!-- 操作按鈕區 -->
+                        <div class="action-area">
+                            <div class="game-controls">
+                                <button class="control-btn skip-btn" id="next-btn">
+                                    <i class="icon-skip"></i> 跳過本關
+                                </button>
+                            </div>
+                            <div class="team-actions">
+                                <button class="team-action-btn red-team" id="red-btn">
+                                    <i class="icon-team"></i> 紅隊得分
+                                </button>
+                                <button class="team-action-btn blue-team" id="blue-btn">
+                                    <i class="icon-team"></i> 藍隊得分
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // 紅隊得分按鈕事件
+                document.getElementById('red-btn').addEventListener('click', () => {
+                    this.score.player1 += 1;
+                    document.getElementById('red-score').textContent = this.score.player1;
+                    this.nextLevel();
+                });
+                
+                // 藍隊得分按鈕事件
+                document.getElementById('blue-btn').addEventListener('click', () => {
+                    this.score.player2 += 1;
+                    document.getElementById('blue-score').textContent = this.score.player2;
+                    this.nextLevel();
+                });
+                
+                // 下一關按鈕事件
+                document.getElementById('next-btn').addEventListener('click', () => {
+                    this.nextLevel();
+                });
+                
+                // 返回首頁按鈕事件
+                document.getElementById('home-btn').addEventListener('click', () => {
+                    if (confirm('確定要結束當前遊戲返回首頁嗎？')) {
+                        this.initPage();
+                    }
+                });
+                
+                // 初始化顯示
+                this.updateLevelInfo();
+            }
+
+            updateLevelInfo() {
+                const category = this.getCurrentCategory();
+                document.getElementById('current-category').textContent = this.getCategoryName(category);
+                document.getElementById('level-timer').textContent = this.levelTimer;
+            }
+
+            // 開始主計時器
+            startMainTimer() {
+                // 清除現有計時器
+                if (this.mainTimerInterval) {
+                    clearInterval(this.mainTimerInterval);
+                }
+                
+                this.mainTimerInterval = setInterval(() => {
+                    this.mainTimer += 1;
+                    document.getElementById('main-timer').textContent = this.formatDisplayTime(this.mainTimer);
+                    
+                    // 檢查遊戲結束條件
+                    if ((this.currentMode === GameMode.GRole && this.mainTimer >= 30) || // 測試用30秒，正式版改為720秒(12分鐘)
+                        (this.currentMode === GameMode.GBrand && this.mainTimer >= 1140)) { // 測試用60秒，正式版改為1140秒(19分鐘)
+                        this.endGame();
+                    }
+                }, 1000);
+            }
+
+            formatDisplayTime(totalSeconds) {
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            // 下一關
+            nextLevel() {
+                clearTimeout(this.levelTimeout);
+                clearInterval(this.levelTimerInterval);
+                
+                this.level += 1;
+                const category = this.getCurrentCategory();
+                
+                this.showLevelImage(category);
+                this.startLevelTimer();
+                this.updateLevelInfo(); // 更新關卡資訊
+            }
+
+            getCategoryName(category) {
+                const names = {
+                    [GameCategory.GUESS_CHARACTER]: '照片猜人物',
+                    [GameCategory.GUESS_CHARACTER_CROPPED]: '擷取照片猜人物',
+                    [GameCategory.GUESS_CHARACTER_SCENE]: '場景猜人物',
+                    [GameCategory.GUESS_WORK_BY_CHARACTER]: '人物猜作品',
+                    [GameCategory.GUESS_BRAND]: '猜品牌',
+                    [GameCategory.GUESS_ORIGINAL_BRAND]: '猜正版品牌',
+                    [GameCategory.GUESS_PARENT_BRAND]: '子品牌猜源品牌',
+                    [GameCategory.FIND_BRAND_DIFFERENCE]: '品牌猜不同'
+                };
+                return names[category] || '未知主題';
+            }
+
+            // 獲取當前題目類別
+            getCurrentCategory() {
+                
+
+                if (this.currentMode === GameMode.GRole) {
+                    if ( (this.mainTimer < 15) && (this.score.player1 < 15 ))
+                     return GameCategory.GUESS_CHARACTER; // 測試用15秒，正式版改為360秒(6分鐘)
+                    else if ((this.mainTimer < 25 ) && (this.score.player1 < 22))
+                     return GameCategory.GUESS_CHARACTER_CROPPED; // 測試用25秒，正式版改為540秒(9分鐘)和15分
+                    else if ((this.mainTimer < 30 ) && (this.score.player1 < 29))
+                     return GameCategory.GUESS_CHARACTER_SCENE; // 測試用30秒，正式版改為720秒(12分鐘)和22分
+                    else if (this.score.player1 >= 29) return GameCategory.GUESS_WORK_BY_CHARACTER; // 測試用7分，正式版改為29分
+                } else {
+                    if (this.mainTimer < 420) return GameCategory.GUESS_BRAND; // 測試用20秒，正式版改為420秒(7分鐘)
+                    else if (this.mainTimer < 840) return GameCategory.GUESS_ORIGINAL_BRAND; // 測試用40秒，正式版改為840秒(14分鐘)
+                    else if (this.mainTimer < 1020) return GameCategory.GUESS_PARENT_BRAND; // 測試用50秒，正式版改為1020秒(17分鐘)
+                    return GameCategory.FIND_BRAND_DIFFERENCE;
+                }
+                
+                // 默認返回第一個類別
+                return GameCategory.GUESS_CHARACTER;
+            }
+
+            // 顯示關卡圖片
+            async showLevelImage(category) {
+            const imageContainer = document.getElementById('image-container');
+            imageContainer.innerHTML = '<div class="loading">載入中...</div>';
+            
+            try {
+                const imagePath = this.getRandomImage(category);
+                console.log('嘗試載入圖片:', imagePath); // 添加日誌
+                
+                await this.preloadImage(imagePath);
+                
+                imageContainer.innerHTML = `
+                    <img src="${imagePath}" 
+                        alt="${category}" 
+                        onerror="this.src='/images/default.jpg'">
+                `;
+            } catch (error) {
+                console.error('顯示圖片失敗:', error);
+                imageContainer.innerHTML = `
+                    <div class="error">圖片載入失敗</div>
+                    <img src="/images/default.jpg" alt="默認圖片">
+                `;
+            }
+        }
+
+            // 開始關卡計時器
+            startLevelTimer() {
+                this.levelTimer = 0;
+                clearTimeout(this.levelTimeout);
+                
+                // 更新本關時間顯示
+                const updateLevelTimer = () => {
+                    this.levelTimer += 1;
+                    if(this.levelTimer<=10){
+                        document.getElementById('level-timer').textContent = this.levelTimer+"秒";
+                    }
+                    else{
+                        document.getElementById('level-timer').textContent = this.levelTimer+"秒  時間到";
+                    }
+                    
+                };
+                
+                // 每秒更新本關時間
+                this.levelTimerInterval = setInterval(updateLevelTimer, 1000);
+                
+            }
+
+            // 結束遊戲
+            endGame() {
+                this.state = GameState.END;
+                clearInterval(this.mainTimerInterval);
+                clearTimeout(this.levelTimeout);
+                
+                // 顯示結束頁面
+                this.showEndPage();
+            }
+
+            // 顯示結束頁面
+            showEndPage() {
+                const container = document.getElementById('game-container');
+                if (this.currentMode === GameMode.GRole) {
+                    container.innerHTML = `
+                        <div class="end-screen">
+                            <h2>遊戲結束</h2>
+                            <p>你的分數: ${this.score.player1}</p>
+                            <button id="restart-btn">再玩一次</button>
+                            <button id="home-btn">返回首頁</button>
+                        </div>
+                    `;
+                } else {
+                    const winner = this.score.player1 > this.score.player2 ? "紅隊" : 
+                                 this.score.player1 < this.score.player2 ? "藍隊" : "平局";
+                    
+                    container.innerHTML = `
+                        <div class="end-screen">
+                            <h2>遊戲結束</h2>
+                            <p>紅隊分數: ${this.score.player1}</p>
+                            <p>藍隊分數: ${this.score.player2}</p>
+                            <p style="font-weight: bold; font-size: 28px;">${winner}獲勝!</p>
+                            <button id="restart-btn">再玩一次</button>
+                            <button id="home-btn">返回首頁</button>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('restart-btn').addEventListener('click', () => {
+                    this.startGame();
+                });
+                
+                document.getElementById('home-btn').addEventListener('click', () => {
+                    this.initPage();
+                });
+            }
+        }
+
+        // 初始化遊戲
+        document.addEventListener('DOMContentLoaded', () => {
+            const game = new Game();
+        });
+    </script>
+</body>
+</html>

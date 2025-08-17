@@ -1,0 +1,509 @@
+/* ========================
+   通用樣式 & 基礎設定
+   ======================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    height: 100vh;
+    overflow: hidden;
+    touch-action: manipulation;
+}
+
+/* ========================
+   佈局與容器
+   ======================== */
+
+#game-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 遊戲UI主容器 */
+.game-ui {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    gap: 20px;
+}
+
+/* 雙人模式專用樣式 */
+.game-ui.multiplayer {
+    /* 繼承基礎樣式，僅需特別設定的屬性 */
+    gap: 15px;
+}
+
+/* 圖片容器 */
+.image-container {
+    flex-grow: 1; 
+    width: 100%;
+    max-width: 600px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* ========================
+   通用按鈕樣式
+   ======================== */
+
+.btn-base,
+.mode-btn,
+.answer-btn,
+.team-btn,
+.end-screen button,
+.next-btn,
+.home-btn,
+.control-btn,
+.action-btn,
+.team-action-btn {
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+    box-sizing: border-box; 
+}
+
+/* 主要按鈕樣式 (遊戲模式、結束畫面、重啟) */
+.mode-btn,
+#restart-btn {
+    border-radius: 15px;
+    padding: 20px 40px;
+    font-size: 24px;
+    min-height: 80px;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #4a6baf;
+    color: white;
+}
+
+.mode-btn:active,
+#restart-btn:active {
+    background-color: #3a5a9f;
+    transform: scale(0.98);
+}
+
+/* 次要按鈕樣式 (下一個) */
+.next-btn {
+    border-radius: 15px;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    min-height: 80px;
+    padding: 20px 40px;
+    font-size: 24px;
+    background-color: #e0e0e0;
+}
+
+.next-btn:active {
+    background-color: #bdbdbd;
+    transform: scale(0.98);
+}
+
+/* 團隊按鈕樣式 */
+.team-btn {
+    border-radius: 15px;
+    padding: 20px 40px;
+    font-size: 24px;
+    min-height: 80px;
+    width: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.team-btn.red {
+    background-color: #ef5350;
+    color: white;
+}
+
+.team-btn.red:active {
+    background-color: #d32f2f;
+    transform: scale(0.98);
+}
+
+.team-btn.blue {
+    background-color: #42a5f5;
+    color: white;
+}
+
+.team-btn.blue:active {
+    background-color: #1976d2;
+    transform: scale(0.98);
+}
+
+/* 遊戲內按鈕 (回答、跳過) */
+.answer-btn,
+.skip-btn {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.answer-btn {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.answer-btn:hover {
+    background-color: #3e8e41;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.answer-btn:active {
+    background-color: #3e8e41;
+    transform: scale(0.98);
+}
+
+.skip-btn {
+    background-color: #f5f5f5;
+    color: #666;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.skip-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* 雙人模式控制按鈕 */
+.control-btn {
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    min-width: 150px;
+}
+
+.team-action-btn {
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    flex: 1;
+    max-width: 200px;
+    color: white;
+    font-weight: bold;
+}
+
+.team-action-btn.red-team {
+    background-color: #ef5350;
+}
+
+.team-action-btn.red-team:hover {
+    background-color: #e53935;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.team-action-btn.blue-team {
+    background-color: #42a5f5;
+}
+
+.team-action-btn.blue-team:hover {
+    background-color: #1e88e5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 首頁按鈕 */
+.home-btn {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: all 0.2s;
+}
+
+.home-btn:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* ========================
+   功能模組樣式
+   ======================== */
+
+.mode-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* 頂部資訊欄 */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+/* 雙人模式專用頂部導航欄 */
+.game-ui.multiplayer .header-bar {
+    margin-bottom: 15px;
+}
+
+.header-info {
+    display: flex;
+    gap: 20px;
+    font-size: 16px;
+    color: #555;
+}
+
+/* 關卡資訊區 */
+.level-info {
+    background-color: #f9f9f9;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.level-title {
+    font-weight: bold;
+    color: #333;
+}
+
+.level-timer {
+    color: #e53935;
+    font-weight: bold;
+}
+
+/* 分數顯示 */
+.timer, .score-display {
+    font-size: 24px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.score-display {
+    margin-bottom: 20px;
+}
+
+/* 單人模式分數顯示 */
+.team-scores {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 20px;
+}
+
+.team {
+    font-size: 24px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.team.red {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.team.blue {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+/* 雙人模式分數顯示 */
+.team-score-display {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.team-score {
+    flex: 1;
+    text-align: center;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.red-team {
+    background-color: #ffebee;
+    border: 2px solid #ef9a9a;
+}
+
+.blue-team {
+    background-color: #e3f2fd;
+    border: 2px solid #90caf9;
+}
+
+.team-name {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.red-team .team-name {
+    color: #c62828;
+}
+
+.blue-team .team-name {
+    color: #1565c0;
+}
+
+.score-value {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.team-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 500px;
+    gap: 20px;
+}
+
+/* 操作按鈕區 */
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    width: 100%;
+}
+
+.game-controls, .game-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+/* 雙人模式操作區域 */
+.action-area {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.game-ui.multiplayer .game-controls {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.team-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+/* 結束畫面 */
+.end-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.end-screen h2 {
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.end-screen p {
+    font-size: 24px;
+    margin: 10px 0;
+}
+
+#home-btn {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+#home-btn:active {
+    background-color: #bdbdbd;
+    transform: scale(0.98);
+}
+
+/* 圖標樣式 */
+.icon-home, .icon-skip, .icon-team {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    background-size: contain;
+}
+
+/* ========================
+   響應式設計
+   ======================== */
+
+@media (orientation: landscape) {
+    .game-ui {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-content: center;
+    }
+
+    .timer,
+    .team-scores,
+    .team-buttons {
+        width: 100%;
+        text-align: center;
+    }
+
+    .image-container {
+        height: 70%;
+        margin-bottom: 10px;
+    }
+}
