@@ -85,11 +85,15 @@ async function scanDirectory(currentDir, result) {
 function formatPaths(rawList) {
     const formatted = {};
     
+    // 假設你的所有圖片都位於 public/images/game 目錄下
+    const publicRoot = path.join(__dirname, '-'); 
+
     for (const [category, files] of Object.entries(rawList)) {
         formatted[category] = files.map(filePath => {
-            // 移除基礎路徑並轉換為正斜杠
-            let relativePath = path.relative(config.basePathToRemove, filePath);
-            return '/' + relativePath.replace(/\\/g, '/');
+            // 從 'public' 目錄開始計算相對路徑
+            const relativeToPublic = path.relative(publicRoot, filePath);
+            // 確保路徑以正斜杠 '/' 開頭，這是網頁路徑的標準格式
+            return '/' + relativeToPublic.replace(/\\/g, '/');
         });
     }
     
