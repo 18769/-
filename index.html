@@ -242,13 +242,33 @@
                                 我知道答案！(+1分)
                             </button>
                         </div>
+                        <div class="game-actions" style="visibility:hidden;">
+                            <button class="action-btn bonus-btn" id="bonus-btn">
+                                加 2 分
+                            </button>
+                        </div>
                     </div>
                 </div>
                 `;
+
+                const bonusActionDiv = document.getElementById('bonus-btn');
+                let isBonus = false;
+                
                 
                 // 得分按鈕事件
                 document.getElementById('answer-btn').addEventListener('click', () => {
                     this.score.player1 += 1;
+                    document.getElementById('score').textContent = this.score.player1;
+                    if (this.score.player1 >= 29 && isBonus == false) {
+                    // 如果分數超過 29，顯示額外分數按鈕
+                    bonusActionDiv.style.visibility = 'visible';
+                    isBonus = true;
+                    }
+                    this.nextLevel();
+                });
+
+                document.getElementById('bonus-btn').addEventListener('click', () => {
+                    this.score.player1 += 2;
                     document.getElementById('score').textContent = this.score.player1;
                     this.nextLevel();
                 });
@@ -261,8 +281,8 @@
                 document.getElementById('home-btn').addEventListener('click', () => {
                 if (confirm('確定要放棄當前遊戲返回首頁嗎？')) {
                     this.initPage();
-                }
-});
+                    }
+                });
 
                 // 初始化顯示
                 this.updateLevelInfo();
