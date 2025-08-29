@@ -259,7 +259,7 @@
                 document.getElementById('answer-btn').addEventListener('click', () => {
                     this.score.player1 += 1;
                     document.getElementById('score').textContent = this.score.player1;
-                    if (this.score.player1 >= 29 && isBonus == false) {
+                    if (this.score.player1 > 29 && isBonus == false) {
                     // 如果分數超過 29，顯示額外分數按鈕
                     bonusActionDiv.style.visibility = 'visible';
                     isBonus = true;
