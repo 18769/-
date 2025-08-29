@@ -432,13 +432,13 @@
             // 獲取當前題目類別
             getCurrentCategory() {
                 if (this.currentMode === GameMode.GRole) {
-                    if ((this.mainTimer < 360) && (this.score.player1 < 15))
+                    if ((this.mainTimer < 360) && (this.score.player1 < 16))
                         return GameCategory.GUESS_CHARACTER; // 6分鐘
-                    else if ((this.mainTimer < 540) && (this.score.player1 < 22))
+                    else if ((this.mainTimer < 540) && (this.score.player1 < 23))
                         return GameCategory.GUESS_CHARACTER_CROPPED; // 9分鐘和15分
-                    else if ((this.mainTimer < 720) && (this.score.player1 < 29))
+                    else if ((this.mainTimer < 720) && (this.score.player1 < 30))
                         return GameCategory.GUESS_CHARACTER_SCENE; // 12分鐘和22分
-                    else if (this.score.player1 >= 29) 
+                    else if (this.score.player1 >= 30) 
                         return GameCategory.GUESS_WORK_BY_CHARACTER; // 29分
                 } else {
                     if (this.mainTimer < 420) return GameCategory.GUESS_BRAND; // 7分鐘
