@@ -25,7 +25,7 @@ const config = {
 // 主函數
 async function generateImageList() {
     try {
-        console.log('開始生成圖片列表...');
+        console.log('開始生成圖片列表...');``
         
         // 檢查根目錄是否存在
         if (!fs.existsSync(config.rootDir)) {

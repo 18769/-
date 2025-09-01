@@ -236,6 +236,9 @@
                             <button class="control-btn skip-btn" id="next-btn">
                                 下一關
                             </button>
+                            <button class="control-btn skip-btn" id="skip-btn">
+                                    +1分鐘(SKIP用)
+                            </button>
                         </div>
                         <div class="game-actions">
                             <button class="action-btn answer-btn" id="answer-btn">
@@ -274,6 +277,11 @@
                 // 下一關按鈕事件
                 document.getElementById('next-btn').addEventListener('click', () => {
                     this.nextLevel();
+                });
+                // 加時間按鈕
+                document.getElementById('skip-btn').addEventListener('click', () => {
+                    this.mainTimer+=60;
+                    document.getElementById('main-timer').textContent = this.formatDisplayTime(this.mainTimer);
                 });
                 
                 document.getElementById('home-btn').addEventListener('click', () => {
@@ -326,6 +334,9 @@
                                 <button class="control-btn skip-btn" id="next-btn">
                                     下一關
                                 </button>
+                                <button class="control-btn skip-btn" id="skip-btn">
+                                    +1分鐘(SKIP用)
+                                </button>
                             </div>
                             <div class="team-actions">
                                 <button class="team-action-btn red-team" id="red-btn">
@@ -345,7 +356,7 @@
                     document.getElementById('red-score').textContent = this.score.player1;
                 });
                 
-                // 藍隊得分按鈕事件
+
                 document.getElementById('blue-btn').addEventListener('click', () => {
                     this.score.player2 += 1;
                     document.getElementById('blue-score').textContent = this.score.player2;
@@ -354,6 +365,11 @@
                 // 下一關按鈕事件
                 document.getElementById('next-btn').addEventListener('click', () => {
                     this.nextLevel();
+                });
+                // 加時間按鈕
+                document.getElementById('skip-btn').addEventListener('click', () => {
+                    this.mainTimer+=60;
+                    document.getElementById('main-timer').textContent = this.formatDisplayTime(this.mainTimer);
                 });
                 
                 // 返回首頁按鈕事件
@@ -403,15 +419,14 @@
                 clearTimeout(this.levelTimeout);
                 clearInterval(this.levelTimerInterval);
                 
-                this.level += 1;
                 const category = this.getCurrentCategory();
-                
+                this.level++;
                 this.showLevelImage(category);
                 this.startLevelTimer();
                 this.updateLevelInfo();
             }
 
-            getCategoryName(category) {
+             getCategoryName(category) {
                 const names = {
                     [GameCategory.GUESS_CHARACTER]: '照片猜人物',
                     [GameCategory.GUESS_CHARACTER_CROPPED]: '擷取照片猜人物',
@@ -425,26 +440,38 @@
                 return names[category] || '未知主題';
             }
 
+            condition(mainTime,score){
+                if(this.currentMode === GameMode.GRole){
+                    return ((this.mainTimer < mainTime) && (this.score.player1 < score))?true:false;
+                }
+                else
+                {
+                    return ((this.mainTimer < mainTime))?true:false;
+                }
+            }
+
             // 獲取當前題目類別
-            getCurrentCategory() {
+             getCurrentCategory() {
                 if (this.currentMode === GameMode.GRole) {
-                    if ((this.mainTimer < 360) && (this.score.player1 < 16))
+                    if (this.condition(360,16))
                         return GameCategory.GUESS_CHARACTER; // 6分鐘
-                    else if ((this.mainTimer < 540) && (this.score.player1 < 23))
+                    else if (this.condition(540,23))
                         return GameCategory.GUESS_CHARACTER_CROPPED; // 9分鐘和15分
-                    else if ((this.mainTimer < 720) && (this.score.player1 < 30))
+                    else if (this.condition(720,30))
                         return GameCategory.GUESS_CHARACTER_SCENE; // 12分鐘和22分
-                    else if (this.score.player1 >= 30) 
+                    else
                         return GameCategory.GUESS_WORK_BY_CHARACTER; // 29分
                 } else {
-                    if (this.mainTimer < 420) return GameCategory.GUESS_BRAND; // 7分鐘
-                    else if (this.mainTimer < 840) return GameCategory.GUESS_ORIGINAL_BRAND; // 14分鐘
-                    else if (this.mainTimer < 1020) return GameCategory.GUESS_PARENT_BRAND; // 17分鐘
+                    if (this.condition(420,'none')) return GameCategory.GUESS_BRAND; // 7分鐘
+                    else if (this.condition(840,'none') ) return GameCategory.GUESS_ORIGINAL_BRAND; // 14分鐘
+                    else if (this.condition(1020,'none')) return GameCategory.GUESS_PARENT_BRAND; // 17分鐘
                     return GameCategory.FIND_BRAND_DIFFERENCE;
                 }
                 
                 return GameCategory.GUESS_CHARACTER;
-            }
+            }            
+
+            
 
             // 顯示關卡圖片
             async showLevelImage(category) {
