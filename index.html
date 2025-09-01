@@ -224,7 +224,7 @@
                     <!-- 關卡資訊區 -->
                     <div class="level-info">
                         <div class="level-title">關卡主題: <span id="current-category"></span></div>
-                        <div class="level-timer"><BR>本關剩餘: <span id="level-timer">10</span></div>
+                        <div class="level-timer"><BR>本關時間: <span id="level-timer">10</span></div>
                     </div>
                     
                     <!-- 圖片顯示區 -->
@@ -234,12 +234,12 @@
                     <div class="action-buttons">
                         <div class="game-controls">
                             <button class="control-btn skip-btn" id="next-btn">
-                                跳過本關
+                                下一關
                             </button>
                         </div>
                         <div class="game-actions">
                             <button class="action-btn answer-btn" id="answer-btn">
-                                我知道答案！(+1分)
+                                加 1 分
                             </button>
                         </div>
                         <div class="game-actions" style="visibility:hidden;">
@@ -264,13 +264,11 @@
                     bonusActionDiv.style.visibility = 'visible';
                     isBonus = true;
                     }
-                    this.nextLevel();
                 });
 
                 document.getElementById('bonus-btn').addEventListener('click', () => {
                     this.score.player1 += 2;
                     document.getElementById('score').textContent = this.score.player1;
-                    this.nextLevel();
                 });
                 
                 // 下一關按鈕事件
@@ -316,7 +314,7 @@
                         <!-- 關卡資訊區 -->
                         <div class="level-info">
                             <div class="level-title">關卡主題: <span id="current-category"></span></div>
-                            <div class="level-timer"><BR>本關剩餘: <span id="level-timer">10</span></div>
+                            <div class="level-timer"><BR>本關目前時間: <span id="level-timer">10</span></div>
                         </div>
                         
                         <!-- 圖片顯示區 -->
@@ -326,7 +324,7 @@
                         <div class="action-area">
                             <div class="game-controls">
                                 <button class="control-btn skip-btn" id="next-btn">
-                                    跳過本關
+                                    下一關
                                 </button>
                             </div>
                             <div class="team-actions">
@@ -345,14 +343,12 @@
                 document.getElementById('red-btn').addEventListener('click', () => {
                     this.score.player1 += 1;
                     document.getElementById('red-score').textContent = this.score.player1;
-                    this.nextLevel();
                 });
                 
                 // 藍隊得分按鈕事件
                 document.getElementById('blue-btn').addEventListener('click', () => {
                     this.score.player2 += 1;
                     document.getElementById('blue-score').textContent = this.score.player2;
-                    this.nextLevel();
                 });
                 
                 // 下一關按鈕事件
