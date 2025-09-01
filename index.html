@@ -240,6 +240,11 @@
                                     +1分鐘(SKIP用)
                             </button>
                         </div>
+                        <div class="game-controls" style="visibility:hidden;">
+                            <button class="control-btn skip-btn" id="reTime-btn">
+                                    有人幫作答？(點我歸零)
+                            </button>
+                        </div>
                         <div class="game-actions">
                             <button class="action-btn answer-btn" id="answer-btn">
                                 加 1 分
@@ -282,6 +287,12 @@
                 document.getElementById('skip-btn').addEventListener('click', () => {
                     this.mainTimer+=60;
                     document.getElementById('main-timer').textContent = this.formatDisplayTime(this.mainTimer);
+                });
+                
+                document.getElementById('reTime-btn').addEventListener('click', () => {
+                    this.levelTimer=0;
+                    document.getElementById('reTime-btn').style.visibility = 'hidden';
+                    document.getElementById('level-timer').textContent = levelTimer+"秒";
                 });
                 
                 document.getElementById('home-btn').addEventListener('click', () => {
@@ -510,11 +521,16 @@
                 // 更新本關時間顯示
                 const updateLevelTimer = () => {
                     this.levelTimer += 1;
+                    var iSretime =false;
+                    const reTimeBTN = document.getElementById('reTime-btn');
+
                     if(this.levelTimer<=10){
                         document.getElementById('level-timer').textContent = this.levelTimer+"秒";
+                        if(iSretime==true){reTimeBTN.style.visibility = 'hidden';iSretime=false}
                     }
                     else{
                         document.getElementById('level-timer').textContent = this.levelTimer+"秒  時間到";
+                        if(iSretime==false){reTimeBTN.style.visibility = 'visible';iSretime=true}
                     }
                 };
                 
