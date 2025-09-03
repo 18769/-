@@ -44,6 +44,7 @@
                 this.levelTimer = 0;
                 this.score = { player1: 0, player2: 0 };
                 this.imageList = {};
+                this.displayedImages = new Set();
 
                 // 類別到文件夾的映射
                 this.categoryFolders = {
@@ -134,24 +135,27 @@
 
             getRandomImage(category) {
                 const folder = this.categoryFolders[category];
-                const basePath = this.getBasePath();
-                const defaultImage = `${basePath}/images/default.jpg`;
-                
                 if (!folder || !this.imageList[folder] || this.imageList[folder].length === 0) {
-                    console.warn(`沒有找到 ${category} 類別的圖片，使用預設圖片`);
-                    return defaultImage;
+                    return this.getDefaultImage();
                 }
-                
-                const images = this.imageList[folder];
-                const randomIndex = Math.floor(Math.random() * images.length);
-                let imagePath = images[randomIndex];
-                
-                // 確保路徑正確
-                if (!imagePath.startsWith('http') && !imagePath.startsWith(basePath)) {
-                    imagePath = basePath + imagePath;
+
+                const availableImages = this.imageList[folder].filter(
+                    imagePath => !this.displayedImages.has(imagePath)
+                );
+
+                if (availableImages.length === 0) {
+                    return '/images/題庫已完.jpg'; // 顯示題庫已完圖片
                 }
+
+                const randomIndex = Math.floor(Math.random() * availableImages.length);
+                const selectedImage = availableImages[randomIndex];
                 
-                return imagePath;
+                // 記錄已顯示的圖片
+                this.displayedImages.add(selectedImage);
+                
+                console.log(`已顯示圖片數量: ${this.displayedImages.size}/${this.imageList[folder].length}`);
+                
+                return selectedImage;
             }
 
             preloadImage(url) {
@@ -190,6 +194,7 @@
                 this.level = 0;
                 this.mainTimer = 0;
                 this.score = { player1: 0, player2: 0 };
+                this.displayedImages.clear(); // 重置已顯示圖片記錄
                 
                 // 根據模式初始化UI
                 if (this.currentMode === GameMode.GRole) {
