@@ -135,9 +135,10 @@
 
             getRandomImage(category) {
                 const basePath = this.getBasePath();
-
                 const folder = this.categoryFolders[category];
+                
                 if (!folder || !this.imageList[folder] || this.imageList[folder].length === 0) {
+                    console.warn(`沒有找到 ${category} 類別的圖片，使用預設圖片`);
                     return this.getDefaultImage();
                 }
 
@@ -145,8 +146,10 @@
                     imagePath => !this.displayedImages.has(imagePath)
                 );
 
+                // 如果所有圖片都顯示過了，顯示「題庫已完」圖片
                 if (availableImages.length === 0) {
-                    return '${basePath}/images//題庫已完.jpg'; // 顯示題庫已完圖片
+                    console.log('題庫已完，顯示結束圖片');
+                    return basePath + '/images/題庫已完.jpg'; // 修正字串拼接
                 }
 
                 const randomIndex = Math.floor(Math.random() * availableImages.length);
@@ -156,6 +159,11 @@
                 this.displayedImages.add(selectedImage);
                 
                 console.log(`已顯示圖片數量: ${this.displayedImages.size}/${this.imageList[folder].length}`);
+                
+                // 確保返回的路徑包含 basePath
+                if (!selectedImage.startsWith('http') && !selectedImage.startsWith(basePath)) {
+                    return basePath + selectedImage;
+                }
                 
                 return selectedImage;
             }
