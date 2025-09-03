@@ -134,6 +134,8 @@
             }
 
             getRandomImage(category) {
+                const basePath = this.getBasePath();
+
                 const folder = this.categoryFolders[category];
                 if (!folder || !this.imageList[folder] || this.imageList[folder].length === 0) {
                     return this.getDefaultImage();
@@ -144,7 +146,7 @@
                 );
 
                 if (availableImages.length === 0) {
-                    return '/images/題庫已完.jpg'; // 顯示題庫已完圖片
+                    return '${basePath}/images//題庫已完.jpg'; // 顯示題庫已完圖片
                 }
 
                 const randomIndex = Math.floor(Math.random() * availableImages.length);
