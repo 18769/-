@@ -51,25 +51,29 @@ body {
     gap: 6px;
 }
 
-/* 圖片容器 - 使用flex-grow自適應剩餘空間 */
+/* 圖片容器 - 修正尺寸問題 */
 .image-container {
-    flex: 1; /* 佔用剩餘空間 */
-    min-height: 200px; /* 最小高度 */
     width: 100%;
+    flex: 1; /* 使用flex自適應空間 */
+    min-height: 150px;
+    max-height: 300px; /* 進一步限制最大高度 */
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    margin: 8px 0;
+    background: #f5f5f5;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    position: relative;
 }
 
 .image-container img {
     max-width: 100%;
     max-height: 100%;
+    width: auto;
+    height: auto;
     object-fit: contain;
+    display: block;
 }
 
 /* ========================
@@ -157,19 +161,19 @@ body {
     transform: scale(0.98);
 }
 
-/* 遊戲內按鈕 - 縮小尺寸 */
+/* 遊戲內按鈕 - 進一步縮小尺寸 */
 .bonus-btn,
 .answer-btn,
 .skip-btn {
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     width: 100%;
-    min-height: 44px; /* 最小觸控目標 */
+    min-height: 36px; /* 縮小最小觸控目標 */
 }
 
 .answer-btn {
@@ -218,34 +222,35 @@ body {
     background-color: #e0e0e0;
 }
 
-/* 控制按鈕 - 縮小尺寸 */
+/* 控制按鈕 - 進一步縮小尺寸 */
 .control-btn {
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 14px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 3px;
     transition: all 0.2s;
-    min-width: 120px;
-    min-height: 44px;
+    min-width: 70px; /* 進一步縮小最小寬度 */
+    min-height: 32px; /* 進一步縮小最小高度 */
 }
 
+/* 團隊得分按鈕 - 修正被吃掉的問題 */
 .team-action-btn {
     padding: 10px 15px;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     transition: all 0.2s;
     flex: 1;
-    max-width: 160px;
+    min-width: 120px; /* 確保足夠寬度 */
     color: white;
     font-weight: bold;
-    min-height: 44px;
+    min-height: 44px; /* 確保足夠高度 */
 }
 
 .team-action-btn.red-team {
@@ -304,13 +309,13 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 6px 0;
     border-bottom: 1px solid #eee;
     flex-shrink: 0; /* 不允許縮小 */
 }
 
 .game-ui.multiplayer .header-bar {
-    padding: 6px 0;
+    padding: 4px 0;
 }
 
 .header-info {
@@ -323,13 +328,13 @@ body {
 /* 關卡資訊區 - 縮小高度 */
 .level-info {
     background-color: #f9f9f9;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0; /* 不允許縮小 */
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .level-title {
@@ -376,18 +381,18 @@ body {
     color: #1565c0;
 }
 
-/* 雙人模式分數顯示 */
+/* 雙人模式分數顯示 - 縮小尺寸 */
 .team-score-display {
     display: flex;
     justify-content: space-around;
-    gap: 15px;
+    gap: 10px;
     flex-shrink: 0;
 }
 
 .team-score {
     flex: 1;
     text-align: center;
-    padding: 10px;
+    padding: 8px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -403,9 +408,9 @@ body {
 }
 
 .team-name {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .red-team .team-name {
@@ -417,7 +422,7 @@ body {
 }
 
 .score-value {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
 }
 
@@ -445,23 +450,26 @@ body {
     flex: 1;
 }
 
-/* 雙人模式操作區域 */
+/* 雙人模式操作區域 - 縮小間距並修正佈局 */
 .action-area {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px; /* 進一步縮小間距 */
     flex-shrink: 0;
 }
 
 .game-ui.multiplayer .game-controls {
     flex-direction: row;
     justify-content: center;
+    gap: 4px; /* 進一步縮小間距 */
 }
 
 .team-actions {
     display: flex;
-    gap: 15px;
+    gap: 12px; /* 確保足夠間距 */
     justify-content: center;
+    width: 100%;
+    padding: 0 10px;
 }
 
 /* 結束畫面 */
@@ -512,40 +520,6 @@ body {
 @media (max-height: 600px) {
     .game-ui {
         padding: 5px;
-        gap: 4px;
-    }
-    
-    .header-bar {
-        padding: 4px 0;
-    }
-    
-    .level-info {
-        padding: 6px 10px;
-        font-size: 12px;
-    }
-    
-    .action-buttons {
-        gap: 6px;
-    }
-    
-    .bonus-btn,
-    .answer-btn,
-    .skip-btn,
-    .control-btn {
-        padding: 8px 12px;
-        font-size: 12px;
-        min-height: 40px;
-    }
-    
-    .header-info {
-        font-size: 12px;
-    }
-}
-
-/* 橫屏模式優化 */
-@media (orientation: landscape) and (max-height: 500px) {
-    .game-ui {
-        padding: 5px;
         gap: 3px;
     }
     
@@ -554,22 +528,66 @@ body {
     }
     
     .level-info {
-        padding: 5px 8px;
+        padding: 4px 8px;
         font-size: 11px;
+    }
+    
+    .action-buttons {
+        gap: 4px;
     }
     
     .bonus-btn,
     .answer-btn,
     .skip-btn,
     .control-btn {
-        padding: 6px 10px;
+        padding: 6px 8px;
         font-size: 11px;
-        min-height: 36px;
+        min-height: 30px;
     }
     
     .header-info {
-        font-size: 11px;
-        gap: 10px;
+        font-size: 12px;
+    }
+    
+    .image-container {
+        max-height: 200px;
+        margin: 4px 0;
+    }
+}
+
+/* 橫屏模式優化 */
+@media (orientation: landscape) and (max-height: 500px) {
+    .game-ui {
+        padding: 5px;
+        gap: 2px;
+    }
+    
+    .header-bar {
+        padding: 2px 0;
+    }
+    
+    .level-info {
+        padding: 4px 6px;
+        font-size: 10px;
+    }
+    
+    .bonus-btn,
+    .answer-btn,
+    .skip-btn,
+    .control-btn {
+        padding: 4px 8px;
+        font-size: 10px;
+        min-height: 28px;
+    }
+    
+    .header-info {
+        font-size: 10px;
+        gap: 8px;
+    }
+    
+    .image-container {
+        max-height: 150px;
+        margin: 2px 0;
     }
 }
 
@@ -593,4 +611,125 @@ body {
         font-size: 15px;
         min-height: 48px;
     }
+}
+
+/* 解答按鈕樣式 */
+.control-btn.answer-btn {
+    background-color: #9c27b0 !important;
+    color: white;
+}
+
+.control-btn.answer-btn.active {
+    background-color: #7b1fa2 !important;
+    animation: pulse 1.5s infinite;
+}
+
+.control-btn.answer-btn:hover {
+    background-color: #8e24aa !important;
+    transform: translateY(-2px);
+}
+
+/* 解答模式樣式 */
+.answer-mode {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.answer-label {
+    background: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.no-answer {
+    background: #fff3e0;
+    border: 2px dashed #ff9800;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    font-size: 16px;
+    margin: 20px 0;
+}
+
+/* 按鈕佈局調整 */
+.game-controls {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.control-btn {
+    min-width: 70px;
+    padding: 6px 8px;
+}
+
+/* 動畫效果 */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .game-controls {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .control-btn {
+        min-width: 60px;
+    }
+
+    .image-container {
+        margin: 8px 0;
+        min-height: 150px;
+        max-height: 250px;
+    }
+    
+    .image-container img {
+        max-height: 100%;
+    }
+    
+    .answer-label {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .team-action-btn {
+        min-width: 100px;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
+
+.error {
+    color: #f44336;
+    text-align: center;
+    padding: 20px;
+    background: #ffebee;
+    border-radius: 5px;
+    margin: 10px 0;
+    border: 1px solid #f44336;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    color: #666;
+    font-size: 18px;
 }

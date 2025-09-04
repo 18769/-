@@ -15,26 +15,26 @@ const config = {
     // 是否要包含子目錄
     includeSubdirectories: true,
     
-    // GitHub Pages 倉庫名稱 (如果你的倉庫名稱不是根域名)
-    // 例如：如果你的 GitHub Pages 網址是 https://username.github.io/repository-name
-    // 那麼請設定 repositoryName: 'repository-name'
-    // 如果是根域名 (https://username.github.io)，請保持為 null
-    repositoryName: null, // 請根據你的實際情況修改
+    // 基礎路徑（從路徑中移除的部分）
+    basePathToRemove: path.join(__dirname),
+    
+    // GitHub Pages 倉庫名稱
+    repositoryName: null,
 };
 
 // 主函數
 async function generateImageList() {
     try {
-        console.log('開始生成圖片列表...');``
+        console.log('開始生成圖片列表...');
         
         // 檢查根目錄是否存在
         if (!fs.existsSync(config.rootDir)) {
             throw new Error(`目錄不存在: ${config.rootDir}`);
         }
 
-        // 收集所有圖片文件
+        // 收集所有圖片文件（包含解答）
         const imageList = {};
-        await scanDirectory(config.rootDir, imageList);
+        await scanDirectoryWithAnswers(config.rootDir, imageList);
         
         // 轉換路徑格式
         const formattedList = formatPaths(imageList);
@@ -49,33 +49,30 @@ async function generateImageList() {
         console.log(`圖片列表已成功生成到: ${config.outputFile}`);
         console.log(`共找到 ${Object.keys(formattedList).length} 個目錄的圖片`);
         
-        // 顯示生成的結果預覽
-        console.log('\n生成的圖片列表預覽:');
-        Object.keys(formattedList).forEach(category => {
-            console.log(`${category}: ${formattedList[category].length} 張圖片`);
-            formattedList[category].slice(0, 3).forEach(img => {
-                console.log(`  - ${img}`);
-            });
-            if (formattedList[category].length > 3) {
-                console.log(`  ... 還有 ${formattedList[category].length - 3} 張圖片`);
-            }
-        });
+        // 顯示統計信息
+        showStatistics(formattedList);
+        
     } catch (error) {
         console.error('生成圖片列表時出錯:', error);
     }
 }
 
-// 掃描目錄並收集圖片
-async function scanDirectory(currentDir, result) {
+// 掃描目錄並收集圖片（包含解答）
+async function scanDirectoryWithAnswers(currentDir, result) {
     const items = fs.readdirSync(currentDir);
     
     for (const item of items) {
         const fullPath = path.join(currentDir, item);
         const stat = fs.statSync(fullPath);
         
-        if (stat.isDirectory() && config.includeSubdirectories) {
-            // 遞歸掃描子目錄
-            await scanDirectory(fullPath, result);
+        if (stat.isDirectory()) {
+            if (item === '解答') {
+                // 掃描解答資料夾並記錄解答圖片
+                await scanAnswerDirectory(fullPath, currentDir, result);
+            } else {
+                // 掃描其他子目錄
+                await scanDirectoryWithAnswers(fullPath, result);
+            }
         } else if (stat.isFile()) {
             // 檢查是否為圖片文件
             const ext = path.extname(item).toLowerCase();
@@ -86,159 +83,176 @@ async function scanDirectory(currentDir, result) {
                 
                 // 初始化分類數組
                 if (!result[categoryKey]) {
-                    result[categoryKey] = [];
+                    result[categoryKey] = {
+                        questions: [],
+                        answers: {}
+                    };
                 }
                 
-                // 添加文件路徑
-                result[categoryKey].push(fullPath);
+                // 添加題目文件路徑到 questions 陣列
+                result[categoryKey].questions.push(fullPath);
             }
         }
     }
 }
 
-// 格式化路徑 - 針對 GitHub Pages 優化
+// 掃描解答資料夾
+async function scanAnswerDirectory(answerDir, parentDir, result) {
+    const items = fs.readdirSync(answerDir);
+    const relativeDir = path.relative(config.rootDir, parentDir);
+    const categoryKey = relativeDir ? relativeDir.replace(/\\/g, '/') : '.';
+    
+    // 確保該分類存在
+    if (!result[categoryKey]) {
+        result[categoryKey] = {
+            questions: [],
+            answers: {}
+        };
+    }
+    
+    for (const item of items) {
+        const fullPath = path.join(answerDir, item);
+        const stat = fs.statSync(fullPath);
+        
+        if (stat.isFile()) {
+            const ext = path.extname(item).toLowerCase();
+            if (config.imageExtensions.includes(ext)) {
+                // 獲取檔案名稱（不含副檔名）作為題目識別
+                const questionName = path.basename(item, path.extname(item));
+                
+                // 記錄解答圖片路徑
+                result[categoryKey].answers[questionName] = fullPath;
+            }
+        }
+    }
+}
+
+// 格式化路徑
 function formatPaths(rawList) {
     const formatted = {};
     
-    for (const [category, files] of Object.entries(rawList)) {
-        formatted[category] = files.map(filePath => {
-            // 獲取相對於項目根目錄的路徑
-            let relativePath = path.relative(__dirname, filePath);
-            
-            // 轉換為正斜杠（重要：GitHub Pages 需要正斜杠）
-            relativePath = relativePath.replace(/\\/g, '/');
-            
-            // 構建最終路徑
-            let finalPath;
-            
-            if (config.repositoryName) {
-                // 有倉庫名稱的情況（非根域名）
-                finalPath = `/${config.repositoryName}/${relativePath}`;
-            } else {
-                // 根域名情況
-                finalPath = `/${relativePath}`;
-            }
-            
-            return finalPath;
-        });
+    for (const [category, data] of Object.entries(rawList)) {
+        formatted[category] = {
+            questions: data.questions.map(filePath => formatSinglePath(filePath)),
+            answers: {}
+        };
         
-        // 按文件名排序，確保一致性
-        formatted[category].sort();
+        // 格式化解答路徑
+        for (const [questionName, answerPath] of Object.entries(data.answers)) {
+            formatted[category].answers[questionName] = formatSinglePath(answerPath);
+        }
     }
     
     return formatted;
 }
 
-// 創建預設圖片（如果不存在）
-function createDefaultImages() {
-    const defaultImageDir = path.join(__dirname, 'images');
-    const defaultImagePath = path.join(defaultImageDir, 'default.jpg');
+// 格式化單一路徑
+function formatSinglePath(filePath) {
+    // 移除基礎路徑並轉換為正斜杠
+    let relativePath = path.relative(config.basePathToRemove, filePath);
+    relativePath = relativePath.replace(/\\/g, '/');
     
-    // 確保 images 目錄存在
-    if (!fs.existsSync(defaultImageDir)) {
-        fs.mkdirSync(defaultImageDir, { recursive: true });
-        console.log('已創建 images 目錄');
+    // 確保路徑以 / 開頭
+    if (!relativePath.startsWith('/')) {
+        relativePath = '/' + relativePath;
     }
     
-    // 如果沒有預設圖片，創建一個簡單的提示文件
-    if (!fs.existsSync(defaultImagePath)) {
-        const placeholderText = `
-預設圖片位置：${defaultImagePath}
-請將您的預設圖片放在這裡，命名為 default.jpg
-
-建議圖片規格：
-- 格式：JPG, PNG, WebP
-- 尺寸：800x600 或 1024x768
-- 大小：<500KB
-        `;
-        
-        fs.writeFileSync(
-            path.join(defaultImageDir, 'README.txt'),
-            placeholderText,
-            'utf8'
-        );
-        console.log('已創建預設圖片說明文件');
+    // 如果有設定倉庫名稱，添加到路徑開頭
+    if (config.repositoryName) {
+        return `/${config.repositoryName}${relativePath}`;
     }
+    
+    return relativePath;
 }
 
-// 驗證生成的 JSON 文件
-function validateGeneratedJSON() {
-    try {
-        if (fs.existsSync(config.outputFile)) {
-            const content = fs.readFileSync(config.outputFile, 'utf8');
-            const parsed = JSON.parse(content);
-            console.log('\n✅ JSON 文件驗證通過');
-            return true;
+// 顯示統計信息
+function showStatistics(formattedList) {
+    console.log('\n📊 統計信息:');
+    let totalQuestions = 0;
+    let totalAnswers = 0;
+    
+    Object.keys(formattedList).forEach(category => {
+        const questionsCount = formattedList[category].questions.length;
+        const answersCount = Object.keys(formattedList[category].answers).length;
+        
+        totalQuestions += questionsCount;
+        totalAnswers += answersCount;
+        
+        console.log(`\n${category}:`);
+        console.log(`  - 題目: ${questionsCount} 張`);
+        console.log(`  - 解答: ${answersCount} 張`);
+        
+        // 顯示前幾個題目和解答
+        if (questionsCount > 0) {
+            console.log(`  - 範例题目: ${formattedList[category].questions[0]}`);
         }
-    } catch (error) {
-        console.error('❌ JSON 文件驗證失敗:', error.message);
+        if (answersCount > 0) {
+            const firstAnswer = Object.values(formattedList[category].answers)[0];
+            console.log(`  - 範例解答: ${firstAnswer}`);
+        }
+    });
+    
+    console.log(`\n總計: ${totalQuestions} 張題目圖片, ${totalAnswers} 張解答圖片`);
+}
+
+// 驗證資料夾結構
+function validateFolderStructure() {
+    console.log('\n🔍 驗證資料夾結構...');
+    
+    if (!fs.existsSync(config.rootDir)) {
+        console.log('❌ 根目錄不存在:', config.rootDir);
         return false;
     }
+    
+    // 檢查是否有解答資料夾
+    const hasAnswerFolders = checkAnswerFolders(config.rootDir);
+    console.log(hasAnswerFolders ? '✅ 找到解答資料夾' : '⚠️  未找到解答資料夾');
+    
+    return true;
 }
 
-// 顯示使用說明
-function showUsageInstructions() {
-    console.log('\n📋 使用說明:');
-    console.log('1. 確保您的圖片已放置在 images/game/ 目錄下的對應子目錄中');
-    console.log('2. 支援的圖片格式: .jpg, .jpeg, .png, .gif, .webp');
-    console.log('3. 目錄結構應該如下：');
-    console.log('   images/game/猜人物/照片猜人物/');
-    console.log('   images/game/猜人物/擷取照片猜人物/');
-    console.log('   images/game/猜品牌/猜品牌/');
-    console.log('   等等...');
+// 檢查是否有解答資料夾
+function checkAnswerFolders(dir) {
+    const items = fs.readdirSync(dir);
+    let hasAnswers = false;
     
-    if (config.repositoryName) {
-        console.log(`\n🌐 GitHub Pages 設定:`);
-        console.log(`   倉庫名稱: ${config.repositoryName}`);
-        console.log(`   網址格式: https://username.github.io/${config.repositoryName}`);
-    } else {
-        console.log(`\n🌐 GitHub Pages 設定:`);
-        console.log(`   根域名模式: https://username.github.io`);
+    for (const item of items) {
+        const fullPath = path.join(dir, item);
+        const stat = fs.statSync(fullPath);
+        
+        if (stat.isDirectory()) {
+            if (item === '解答') {
+                console.log(`✅ 找到解答資料夾: ${path.relative(config.rootDir, fullPath)}`);
+                hasAnswers = true;
+            } else {
+                hasAnswers = checkAnswerFolders(fullPath) || hasAnswers;
+            }
+        }
     }
     
-    console.log('\n4. 運行此腳本後，將生成的 js/image-list.json 文件一起提交到 GitHub');
-    console.log('5. 確保 GitHub Pages 已啟用並指向正確的分支');
+    return hasAnswers;
+}
+
+// 創建預設圖片
+function createDefaultImages() {
+    const defaultImageDir = path.join(__dirname, 'images');
+    if (!fs.existsSync(defaultImageDir)) {
+        fs.mkdirSync(defaultImageDir, { recursive: true });
+    }
 }
 
 // 執行生成
 async function main() {
-    showUsageInstructions();
+    console.log('🖼️  圖片列表生成器（包含解答功能）');
+    console.log('================================');
     
-    // 創建預設圖片目錄
     createDefaultImages();
-    
-    // 生成圖片列表
+    validateFolderStructure();
     await generateImageList();
     
-    // 驗證生成的 JSON
-    validateGeneratedJSON();
-    
-    console.log('\n🎉 圖片列表生成完成！');
-    console.log('請將生成的文件提交到 GitHub 倉庫。');
+    console.log('\n🎉 生成完成！');
+    console.log('請檢查生成的 js/image-list.json 文件');
 }
 
-// 檢查命令行參數
-if (process.argv.includes('--help') || process.argv.includes('-h')) {
-    console.log('圖片列表生成器');
-    console.log('');
-    console.log('使用方法: node generate-image-list.js [選項]');
-    console.log('');
-    console.log('選項:');
-    console.log('  --help, -h     顯示此幫助信息');
-    console.log('  --repo <name>  設定 GitHub 倉庫名稱');
-    console.log('');
-    console.log('範例:');
-    console.log('  node generate-image-list.js');
-    console.log('  node generate-image-list.js --repo my-game-repo');
-    process.exit(0);
-}
-
-// 檢查是否有設定倉庫名稱的參數
-const repoIndex = process.argv.indexOf('--repo');
-if (repoIndex !== -1 && process.argv[repoIndex + 1]) {
-    config.repositoryName = process.argv[repoIndex + 1];
-    console.log(`使用倉庫名稱: ${config.repositoryName}`);
-}
-
-// 執行主函數
+// 執行
 main().catch(console.error);

@@ -10,6 +10,20 @@
     <div id="game-container"></div>
 
     <script>
+        function getBasename(filepath, ext) {
+            const filename = filepath.split('/').pop() || filepath;
+            if (ext && filename.endsWith(ext)) {
+                return filename.slice(0, -ext.length);
+            }
+            return filename;
+        }
+
+        function getExtension(filepath) {
+            const filename = filepath.split('/').pop() || filepath;
+            const lastDot = filename.lastIndexOf('.');
+            return lastDot === -1 ? '' : filename.slice(lastDot);
+        }
+
         // 遊戲狀態
         const GameState = {
             INIT: 0,
@@ -63,6 +77,11 @@
                 this.mainTimerInterval = null;
                 this.levelTimeout = null;
                 
+                this.showAnswerMode = false;
+                this.currentQuestionPath = '';
+                this.answerButtonEnabled = false;
+
+
                 // 初始化遊戲
                 this.initPage();
             }
@@ -83,20 +102,37 @@
             async loadImageList() {
                 try {
                     const basePath = this.getBasePath();
-                    const response = await fetch(`${basePath}/js/image-list.json`);
+                    const jsonPath = `${basePath}/js/image-list.json`;
+                    
+                    console.log('嘗試載入圖片列表:', jsonPath);
+                    
+                    const response = await fetch(jsonPath);
                     
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error(`HTTP error! status: ${response.status}, url: ${jsonPath}`);
                     }
                     
-                    this.imageList = await response.json();
-                    console.log('圖片列表載入完成', this.imageList);
+                    const data = await response.json();
+                    this.imageList = data;
+                    
+                    console.log('圖片列表載入完成:', this.imageList);
+                    
+                    // 檢查資料結構
+                    for (const [folder, content] of Object.entries(this.imageList)) {
+                        console.log(`資料夾 ${folder}:`, content);
+                        if (Array.isArray(content)) {
+                            console.log(`  - 舊格式，圖片數量: ${content.length}`);
+                        } else if (content.questions) {
+                            console.log(`  - 新格式，題目數量: ${content.questions.length}, 解答數量: ${Object.keys(content.answers || {}).length}`);
+                        }
+                    }
+                    
                 } catch (error) {
                     console.error('載入圖片列表失敗:', error);
                     
                     // 使用備用圖片列表
                     this.imageList = this.getDefaultImageList();
-                    console.log('使用預設圖片列表');
+                    console.log('使用預設圖片列表:', this.imageList);
                 }
             }
 
@@ -133,48 +169,112 @@
                 };
             }
 
+            getDefaultImage() {
+                const basePath = this.getBasePath();
+                return `${basePath}/images/default.jpg`;
+            }
+
             getRandomImage(category) {
                 const basePath = this.getBasePath();
                 const folder = this.categoryFolders[category];
                 
-                if (!folder || !this.imageList[folder] || this.imageList[folder].length === 0) {
-                    console.warn(`沒有找到 ${category} 類別的圖片，使用預設圖片`);
+                console.log('目標分類:', category);
+                console.log('對應資料夾:', folder);
+                console.log('可用圖片列表:', this.imageList[folder]);
+                
+                // 檢查是否有該分類的圖片
+                if (!folder || !this.imageList[folder]) {
+                    console.warn(`沒有找到 ${category} 類別的圖片資料，使用預設圖片`);
                     return this.getDefaultImage();
                 }
-
-                const availableImages = this.imageList[folder].filter(
+                
+                // 處理新的 JSON 結構（包含 questions 和 answers）
+                let availableImages = [];
+                if (Array.isArray(this.imageList[folder])) {
+                    // 舊格式：直接是陣列
+                    availableImages = this.imageList[folder];
+                } else if (this.imageList[folder].questions) {
+                    // 新格式：包含 questions 陣列
+                    availableImages = this.imageList[folder].questions;
+                } else {
+                    console.warn(`${category} 類別的圖片格式不正確`);
+                    return this.getDefaultImage();
+                }
+                
+                if (availableImages.length === 0) {
+                    console.warn(`${category} 類別沒有圖片`);
+                    return this.getDefaultImage();
+                }
+                
+                // 過濾已顯示的圖片
+                const unshownImages = availableImages.filter(
                     imagePath => !this.displayedImages.has(imagePath)
                 );
-
+                
                 // 如果所有圖片都顯示過了，顯示「題庫已完」圖片
-                if (availableImages.length === 0) {
+                if (unshownImages.length === 0) {
                     console.log('題庫已完，顯示結束圖片');
-                    return basePath + '/images/題庫已完.jpg'; // 修正字串拼接
+                    return `${basePath}/images/題庫已完.jpg`;
                 }
-
-                const randomIndex = Math.floor(Math.random() * availableImages.length);
-                const selectedImage = availableImages[randomIndex];
+                
+                // 隨機選擇一張圖片
+                const randomIndex = Math.floor(Math.random() * unshownImages.length);
+                const selectedImage = unshownImages[randomIndex];
                 
                 // 記錄已顯示的圖片
                 this.displayedImages.add(selectedImage);
                 
-                console.log(`已顯示圖片數量: ${this.displayedImages.size}/${this.imageList[folder].length}`);
+                console.log(`已顯示圖片數量: ${this.displayedImages.size}/${availableImages.length}`);
+                console.log('選中的圖片路徑:', selectedImage);
                 
-                // 確保返回的路徑包含 basePath
-                if (!selectedImage.startsWith('http') && !selectedImage.startsWith(basePath)) {
-                    return basePath + selectedImage;
+                // 處理路徑格式
+                let finalPath = selectedImage;
+                
+                // 如果路徑已經是完整的（以 / 開頭），直接使用
+                if (selectedImage.startsWith('/')) {
+                    finalPath = selectedImage;
+                } 
+                // 如果是相對路徑，加上 basePath
+                else if (!selectedImage.startsWith('http')) {
+                    finalPath = basePath + (selectedImage.startsWith('/') ? '' : '/') + selectedImage;
                 }
                 
-                return selectedImage;
+                console.log('最終圖片路徑:', finalPath);
+                return finalPath;
             }
+
 
             preloadImage(url) {
                 return new Promise((resolve, reject) => {
                     const img = new Image();
-                    img.onload = () => resolve(url);
-                    img.onerror = () => reject(new Error(`圖片載入失敗: ${url}`));
+                    
+                    img.onload = () => {
+                        console.log('圖片預載成功:', url);
+                        resolve(url);
+                    };
+                    
+                    img.onerror = (error) => {
+                        console.error('圖片預載失敗:', url, error);
+                        reject(new Error(`無法載入圖片: ${url}`));
+                    };
+                    
+                    // 設置超時
+                    setTimeout(() => {
+                        if (!img.complete) {
+                            console.warn('圖片載入超時:', url);
+                            reject(new Error(`圖片載入超時: ${url}`));
+                        }
+                    }, 10000); // 10秒超時
+                    
                     img.src = url;
                 });
+            }
+
+            clearImageContainer() {
+                const imageContainer = document.getElementById('image-container');
+                if (imageContainer) {
+                    imageContainer.innerHTML = '';
+                }
             }
 
             // 初始化頁面
@@ -348,10 +448,10 @@
                         <!-- 關卡資訊區 -->
                         <div class="level-info">
                             <div class="level-title">關卡主題: <span id="current-category"></span></div>
-                            <div class="level-timer"><BR>本關目前時間: <span id="level-timer">10</span></div>
+                            <div class="level-timer">本關目前時間: <span id="level-timer">10</span></div>
                         </div>
                         
-                        <!-- 圖片顯示區 -->
+                        <!-- 圖片顯示區 - 使用你的CSS類別 -->
                         <div class="image-container" id="image-container"></div>
                         
                         <!-- 操作按鈕區 -->
@@ -362,6 +462,10 @@
                                 </button>
                                 <button class="control-btn skip-btn" id="skip-btn">
                                     +1分鐘(SKIP用)
+                                </button>
+                                <!-- 解答按鈕 - 使用你定義的樣式類別 -->
+                                <button class="control-btn answer-btn" id="answer-toggle-btn" style="display: none;">
+                                    顯示解答
                                 </button>
                             </div>
                             <div class="team-actions">
@@ -375,14 +479,25 @@
                         </div>
                     </div>
                 `;
+
+                // 設置事件監聽器
+                this.setupMultiPlayerEventListeners();
+            }
+
+            // 新增：專門設置事件監聽器的方法
+            setupMultiPlayerEventListeners() {
+                // 解答按鈕事件
+                document.getElementById('answer-toggle-btn').addEventListener('click', () => {
+                    this.toggleAnswer();
+                });
                 
-                // 紅隊得分按鈕事件
+                // 紅隊得分按鈕事件 - 修正：添加 nextLevel()
                 document.getElementById('red-btn').addEventListener('click', () => {
                     this.score.player1 += 1;
                     document.getElementById('red-score').textContent = this.score.player1;
                 });
-                
 
+                // 藍隊得分按鈕事件 - 修正：添加 nextLevel()
                 document.getElementById('blue-btn').addEventListener('click', () => {
                     this.score.player2 += 1;
                     document.getElementById('blue-score').textContent = this.score.player2;
@@ -392,9 +507,10 @@
                 document.getElementById('next-btn').addEventListener('click', () => {
                     this.nextLevel();
                 });
+                
                 // 加時間按鈕
                 document.getElementById('skip-btn').addEventListener('click', () => {
-                    this.mainTimer+=60;
+                    this.mainTimer += 60;
                     document.getElementById('main-timer').textContent = this.formatDisplayTime(this.mainTimer);
                 });
                 
@@ -404,9 +520,6 @@
                         this.initPage();
                     }
                 });
-                
-                // 初始化顯示
-                this.updateLevelInfo();
             }
 
             updateLevelInfo() {
@@ -442,14 +555,31 @@
 
             // 下一關
             nextLevel() {
+                // 重置解答相關狀態
+                this.showAnswerMode = false;
+
+                // 清理計時器
                 clearTimeout(this.levelTimeout);
                 clearInterval(this.levelTimerInterval);
                 
                 const category = this.getCurrentCategory();
                 this.level++;
+                
+                console.log('進入下一關:', {
+                    level: this.level,
+                    category: this.getCategoryName(category)
+                });
+                
+                // 顯示新關卡
                 this.showLevelImage(category);
                 this.startLevelTimer();
                 this.updateLevelInfo();
+
+                // 根據條件啟用解答按鈕
+                this.checkAndEnableAnswerButton(category);
+                
+                // 更新按鈕狀態
+                this.updateAnswerButton();
             }
 
              getCategoryName(category) {
@@ -476,6 +606,20 @@
                 }
             }
 
+            // 從路徑獲取分類
+            getCategoryFromPath(imagePath) {
+                // 根據您的路徑結構來解析分類
+                // 例如: /images/game/猜人物/照片猜人物/rick.jpg → 猜人物/照片猜人物
+                const pathParts = imagePath.split('/');
+                const gameIndex = pathParts.indexOf('game');
+                
+                if (gameIndex !== -1 && pathParts.length > gameIndex + 2) {
+                    return pathParts.slice(gameIndex + 1, gameIndex + 3).join('/');
+                }
+                
+                return null;
+            }
+
             // 獲取當前題目類別
              getCurrentCategory() {
                 if (this.currentMode === GameMode.GRole) {
@@ -497,33 +641,245 @@
                 return GameCategory.GUESS_CHARACTER;
             }            
 
-            
+            // 更新解答按鈕狀態
+            updateAnswerButton() {
+                const answerBtn = document.getElementById('answer-toggle-btn');
+                if (answerBtn && this.answerButtonEnabled) {
+                    if (this.showAnswerMode) {
+                        answerBtn.textContent = '返回題目';
+                        answerBtn.classList.add('active');
+                    } else {
+                        answerBtn.textContent = '顯示解答';
+                        answerBtn.classList.remove('active');
+                    }
+                    console.log('按鈕文字更新為:', answerBtn.textContent);
+                }
+            }
+
+            // 在適當的時機啟用解答按鈕（例如：特定關卡或時間）
+            enableAnswerButton(enable) {
+                const answerBtn = document.getElementById('answer-toggle-btn'); // 修正ID
+                if (answerBtn) {
+                    this.answerButtonEnabled = enable;
+                    answerBtn.style.display = enable ? 'block' : 'none';
+                    
+                    if (!enable) {
+                        this.showAnswerMode = false;
+                        this.showQuestionImage();
+                    }
+                }
+            }
+
+            // 檢查並啟用解答按鈕
+            checkAndEnableAnswerButton(category) {
+                // 只在特定關卡類型啟用解答按鈕
+                const answerEnabledCategories = [
+                    GameCategory.GUESS_ORIGINAL_BRAND,
+                    GameCategory.GUESS_PARENT_BRAND,
+                    GameCategory.FIND_BRAND_DIFFERENCE
+                ];
+                
+                const enableAnswer = answerEnabledCategories.includes(category);
+                this.enableAnswerButton(enableAnswer);
+            }
+
+            // 切換解答顯示
+            toggleAnswer() {
+                if (!this.answerButtonEnabled) {
+                    console.log('解答按鈕未啟用');
+                    return;
+                }
+                
+                console.log('切換前狀態:', this.showAnswerMode ? '解答模式' : '題目模式');
+                
+                // 切換狀態
+                this.showAnswerMode = !this.showAnswerMode;
+                
+                // 根據狀態顯示內容
+                if (this.showAnswerMode) {
+                    this.showAnswerImage();
+                } else {
+                    this.showQuestionImage();
+                }
+                
+                // 更新按鈕
+                this.updateAnswerButton();
+                
+                console.log('切換後狀態:', this.showAnswerMode ? '解答模式' : '題目模式');
+            }
+
+            // 顯示解答圖片
+           async showAnswerImage() {
+                const imageContainer = document.getElementById('image-container');
+                
+                console.log('嘗試顯示解答，當前題目路徑:', this.currentQuestionPath);
+                
+                try {
+                    const answerPath = this.getAnswerPath(this.currentQuestionPath);
+                    
+                    if (answerPath) {
+                        console.log('準備載入解答圖片:', answerPath);
+                        
+                        // 預載解答圖片
+                        await this.preloadImage(answerPath);
+                        
+                        // 完全按照你的CSS結構 - 圖片 + 絕對定位的標籤
+                        imageContainer.innerHTML = `
+                            <img src="${answerPath}" 
+                                alt="解答圖片" 
+                                onerror="this.src='${this.getDefaultImage()}';">
+                            <div style="position: absolute; top: 10px; left: 10px; background: #4CAF50; color: white; padding: 8px 12px; border-radius: 5px; font-size: 12px; font-weight: bold; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                                解答
+                            </div>
+                        `;
+                        
+                        console.log('解答圖片顯示成功');
+                        
+                    } else {
+                        console.log('沒有找到解答圖片');
+                        // 保持容器結構，只是顯示文字訊息
+                        imageContainer.innerHTML = `
+                            <div class="no-answer">本題目沒有提供解答圖片</div>
+                        `;
+                    }
+                    
+                } catch (error) {
+                    console.error('載入解答失敗:', error);
+                    imageContainer.innerHTML = `
+                        <div class="error">載入解答時發生錯誤</div>
+                    `;
+                }
+            }
+
+            debugAnswerSystem() {
+                console.log('=== 解答系統除錯資訊 ===');
+                console.log('當前題目路徑:', this.currentQuestionPath);
+                console.log('當前分類:', this.getCurrentCategory());
+                console.log('對應資料夾:', this.categoryFolders[this.getCurrentCategory()]);
+                
+                const folder = this.categoryFolders[this.getCurrentCategory()];
+                if (folder && this.imageList[folder]) {
+                    console.log('資料夾內容:', this.imageList[folder]);
+                    
+                    if (this.imageList[folder].answers) {
+                        console.log('可用解答:', Object.keys(this.imageList[folder].answers));
+                    } else {
+                        console.log('該資料夾沒有解答');
+                    }
+                } else {
+                    console.log('找不到資料夾或資料夾內容');
+                }
+                
+                // 測試路徑解析
+                if (this.currentQuestionPath) {
+                    const extension = getExtension(this.currentQuestionPath);
+                    const fileName = getBasename(this.currentQuestionPath, extension);
+                    console.log('解析結果 - 副檔名:', extension, '檔名:', fileName);
+                    
+                    const answerPath = this.getAnswerPath(this.currentQuestionPath);
+                    console.log('解答路徑:', answerPath);
+                }
+                console.log('========================');
+            }
+
+            // 顯示題目圖片
+            showQuestionImage() {
+                const imageContainer = document.getElementById('image-container');
+                const category = this.getCurrentCategory();
+                
+                // 直接放圖片，符合你的CSS結構
+                imageContainer.innerHTML = `
+                    <img src="${this.currentQuestionPath}" 
+                        alt="${this.getCategoryName(category)}" 
+                        onerror="this.src='${this.getDefaultImage()}';">
+                `;
+                
+                console.log('顯示題目圖片:', this.currentQuestionPath);
+            }
+
+             getAnswerPath(questionPath) {
+                try {
+                    console.log('開始尋找解答圖片，題目路徑:', questionPath);
+                    
+                    // 使用瀏覽器相容的方式獲取檔案名稱
+                    const extension = getExtension(questionPath);
+                    const fileName = getBasename(questionPath, extension);
+                    
+                    console.log('提取的檔案名稱:', fileName);
+                    
+                    // 獲取當前分類對應的資料夾
+                    const currentCategory = this.getCurrentCategory();
+                    const folder = this.categoryFolders[currentCategory];
+                    
+                    console.log('當前分類:', currentCategory);
+                    console.log('對應資料夾:', folder);
+                    
+                    // 檢查該資料夾是否有解答
+                    if (!folder || !this.imageList[folder]) {
+                        console.warn('找不到對應的資料夾:', folder);
+                        return null;
+                    }
+                    
+                    const folderData = this.imageList[folder];
+                    console.log('資料夾內容:', folderData);
+                    
+                    // 檢查是否有 answers 物件
+                    if (!folderData.answers || typeof folderData.answers !== 'object') {
+                        console.warn('該資料夾沒有解答圖片');
+                        return null;
+                    }
+                    
+                    // 尋找對應的解答
+                    const answerPath = folderData.answers[fileName];
+                    console.log('找到的解答路徑:', answerPath);
+                    
+                    if (!answerPath) {
+                        console.warn(`找不到檔案 ${fileName} 的解答`);
+                        console.log('可用的解答列表:', Object.keys(folderData.answers));
+                        return null;
+                    }
+                    
+                    return answerPath;
+                    
+                } catch (error) {
+                    console.error('獲取解答路徑時發生錯誤:', error);
+                    return null;
+                }
+            }
+                    
 
             // 顯示關卡圖片
             async showLevelImage(category) {
                 const imageContainer = document.getElementById('image-container');
+                
+                // 載入提示 - 使用你CSS中定義的loading樣式
                 imageContainer.innerHTML = '<div class="loading">載入中...</div>';
                 
                 try {
                     const imagePath = this.getRandomImage(category);
+                    this.currentQuestionPath = imagePath; // 設置當前問題路徑
+                    
                     console.log('嘗試載入圖片:', imagePath);
                     
+                    // 預載圖片
                     await this.preloadImage(imagePath);
                     
-                    const basePath = this.getBasePath();
-                    const fallbackImage = `${basePath}/images/default.jpg`;
-                    
+                    // 顯示圖片 - 直接放img標籤
                     imageContainer.innerHTML = `
                         <img src="${imagePath}" 
-                            alt="${category}" 
-                            onerror="this.src='${fallbackImage}'">
+                            alt="${this.getCategoryName(category)}" 
+                            onerror="this.src='${this.getDefaultImage()}';">
                     `;
+                    
+                    console.log('圖片顯示成功');
+                    
                 } catch (error) {
                     console.error('顯示圖片失敗:', error);
-                    const basePath = this.getBasePath();
+                    
+                    // 錯誤顯示 - 使用你CSS中定義的error樣式
                     imageContainer.innerHTML = `
-                        <div class="error">圖片載入失敗，顯示預設圖片</div>
-                        <img src="${basePath}/images/default.jpg" alt="預設圖片">
+                        <div class="error">圖片載入失敗</div>
+                        <img src="${this.getDefaultImage()}" alt="預設圖片">
                     `;
                 }
             }
