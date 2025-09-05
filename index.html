@@ -243,7 +243,7 @@
                 
                 // 如果圖片路徑已經是絕對路徑（以 / 開頭）
                 if (selectedImage.startsWith('/')) {
-                    finalPath = selectedImage;
+                    finalPath = basePath +'/'+selectedImage;
                 }
                 // 如果是完整 URL
                 else if (selectedImage.startsWith('http')) {
@@ -255,7 +255,6 @@
                     if (basePath && !basePath.endsWith('/')) {
                         finalPath = basePath + '/' + selectedImage;
                     } else {
-                        console.log("yee");
                         finalPath = basePath + selectedImage;
                     }
                 }
