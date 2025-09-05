@@ -87,24 +87,29 @@
             }
 
             // 獲取基礎路徑 - 自動檢測環境
+            // 獲取基礎路徑 - 自動檢測環境
             getBasePath() {
-                // 先檢查是否在 GitHub Pages 環境
-                if (window.location.hostname.includes('github.io')) {
+                // 檢查是否在 GitHub Pages 環境
+                const hostname = window.location.hostname;
+                const pathname = window.location.pathname;
+
+                if (hostname.includes('github.io')) {
                     // GitHub Pages URL 格式: https://username.github.io/repository-name/
-                    const pathParts = window.location.pathname.split('/').filter(part => part);
+                    const pathParts = pathname.split('/').filter(part => part);
                     if (pathParts.length > 0) {
-                        return '/' + pathParts[0]; // 倉庫名稱
+                        // 返回 /repository-name
+                        return '/' + pathParts[0]; 
                     }
                 }
                 
-                // 檢查是否有子路徑（非根域名部署）
-                const pathName = window.location.pathname;
-                if (pathName !== '/' && pathName !== '/index.html') {
-                    const basePath = pathName.split('/').slice(0, -1).join('/');
-                    return basePath || '';
+                // 如果在子資料夾中運行 (例如: localhost/game/)
+                const lastSlash = pathname.lastIndexOf('/');
+                if (lastSlash > 0) {
+                    return pathname.substring(0, lastSlash);
                 }
                 
-                return ''; // 本地開發環境或根域名
+                // 本地開發環境或根目錄
+                return '';
             }
 
             async loadImageList() {
