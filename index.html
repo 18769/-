@@ -88,51 +88,70 @@
 
             // 獲取基礎路徑 - 自動檢測環境
             getBasePath() {
-                // 檢查是否在 GitHub Pages 環境
+                // 先檢查是否在 GitHub Pages 環境
                 if (window.location.hostname.includes('github.io')) {
-                    // GitHub Pages 需要包含倉庫名稱
+                    // GitHub Pages URL 格式: https://username.github.io/repository-name/
                     const pathParts = window.location.pathname.split('/').filter(part => part);
                     if (pathParts.length > 0) {
                         return '/' + pathParts[0]; // 倉庫名稱
                     }
                 }
+                
+                // 檢查是否有子路徑（非根域名部署）
+                const pathName = window.location.pathname;
+                if (pathName !== '/' && pathName !== '/index.html') {
+                    const basePath = pathName.split('/').slice(0, -1).join('/');
+                    return basePath || '';
+                }
+                
                 return ''; // 本地開發環境或根域名
             }
 
             async loadImageList() {
                 try {
                     const basePath = this.getBasePath();
-                    const jsonPath = `${basePath}/js/image-list.json`;
                     
-                    console.log('嘗試載入圖片列表:', jsonPath);
+                    // 嘗試多個可能的路徑
+                    const possiblePaths = [
+                        `${basePath}/js/image-list.json`,
+                        `./js/image-list.json`,
+                        `js/image-list.json`
+                    ];
                     
-                    const response = await fetch(jsonPath);
+                    console.log('嘗試載入路徑:', possiblePaths);
                     
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}, url: ${jsonPath}`);
+                    let response = null;
+                    let successPath = '';
+                    
+                    for (const jsonPath of possiblePaths) {
+                        try {
+                            console.log('嘗試路徑:', jsonPath);
+                            response = await fetch(jsonPath);
+                            if (response.ok) {
+                                successPath = jsonPath;
+                                break;
+                            }
+                        } catch (e) {
+                            console.log(`路徑 ${jsonPath} 失敗:`, e.message);
+                            continue;
+                        }
                     }
+                    
+                    if (!response || !response.ok) {
+                        throw new Error(`所有路徑都無法載入 image-list.json`);
+                    }
+                    
+                    console.log('成功載入路徑:', successPath);
                     
                     const data = await response.json();
                     this.imageList = data;
                     
                     console.log('圖片列表載入完成:', this.imageList);
                     
-                    // 檢查資料結構
-                    for (const [folder, content] of Object.entries(this.imageList)) {
-                        console.log(`資料夾 ${folder}:`, content);
-                        if (Array.isArray(content)) {
-                            console.log(`  - 舊格式，圖片數量: ${content.length}`);
-                        } else if (content.questions) {
-                            console.log(`  - 新格式，題目數量: ${content.questions.length}, 解答數量: ${Object.keys(content.answers || {}).length}`);
-                        }
-                    }
-                    
                 } catch (error) {
                     console.error('載入圖片列表失敗:', error);
-                    
-                    // 使用備用圖片列表
                     this.imageList = this.getDefaultImageList();
-                    console.log('使用預設圖片列表:', this.imageList);
+                    console.log('使用預設圖片列表');
                 }
             }
 
@@ -178,23 +197,19 @@
                 const basePath = this.getBasePath();
                 const folder = this.categoryFolders[category];
                 
-                console.log('目標分類:', category);
-                console.log('對應資料夾:', folder);
-                console.log('可用圖片列表:', this.imageList[folder]);
+                console.log('獲取圖片 - 分類:', category);
+                console.log('獲取圖片 - 資料夾:', folder);
+                console.log('獲取圖片 - basePath:', basePath);
                 
-                // 檢查是否有該分類的圖片
                 if (!folder || !this.imageList[folder]) {
-                    console.warn(`沒有找到 ${category} 類別的圖片資料，使用預設圖片`);
+                    console.warn(`沒有找到 ${category} 類別的圖片資料`);
                     return this.getDefaultImage();
                 }
                 
-                // 處理新的 JSON 結構（包含 questions 和 answers）
                 let availableImages = [];
                 if (Array.isArray(this.imageList[folder])) {
-                    // 舊格式：直接是陣列
                     availableImages = this.imageList[folder];
                 } else if (this.imageList[folder].questions) {
-                    // 新格式：包含 questions 陣列
                     availableImages = this.imageList[folder].questions;
                 } else {
                     console.warn(`${category} 類別的圖片格式不正確`);
@@ -202,69 +217,80 @@
                 }
                 
                 if (availableImages.length === 0) {
-                    console.warn(`${category} 類別沒有圖片`);
                     return this.getDefaultImage();
                 }
                 
-                // 過濾已顯示的圖片
                 const unshownImages = availableImages.filter(
                     imagePath => !this.displayedImages.has(imagePath)
                 );
                 
-                // 如果所有圖片都顯示過了，顯示「題庫已完」圖片
                 if (unshownImages.length === 0) {
-                    console.log('題庫已完，顯示結束圖片');
                     return `${basePath}/images/題庫已完.jpg`;
                 }
                 
-                // 隨機選擇一張圖片
                 const randomIndex = Math.floor(Math.random() * unshownImages.length);
                 const selectedImage = unshownImages[randomIndex];
                 
-                // 記錄已顯示的圖片
                 this.displayedImages.add(selectedImage);
                 
-                console.log(`已顯示圖片數量: ${this.displayedImages.size}/${availableImages.length}`);
-                console.log('選中的圖片路徑:', selectedImage);
-                
-                // 處理路徑格式
+                // 修正路徑處理邏輯
                 let finalPath = selectedImage;
                 
-                // 如果路徑已經是完整的（以 / 開頭），直接使用
+                // 如果圖片路徑已經是絕對路徑（以 / 開頭）
                 if (selectedImage.startsWith('/')) {
                     finalPath = selectedImage;
-                } 
-                // 如果是相對路徑，加上 basePath
-                else if (!selectedImage.startsWith('http')) {
-                    finalPath = basePath + (selectedImage.startsWith('/') ? '' : '/') + selectedImage;
+                }
+                // 如果是完整 URL
+                else if (selectedImage.startsWith('http')) {
+                    finalPath = selectedImage;
+                }
+                // 如果是相對路徑，需要加上 basePath
+                else {
+                    // 確保路徑正確拼接
+                    if (basePath && !basePath.endsWith('/')) {
+                        finalPath = basePath + '/' + selectedImage;
+                    } else {
+                        finalPath = basePath + selectedImage;
+                    }
                 }
                 
                 console.log('最終圖片路徑:', finalPath);
                 return finalPath;
             }
 
-
             preloadImage(url) {
                 return new Promise((resolve, reject) => {
+                    // 添加更多除錯資訊
+                    console.log('開始預載圖片:', url);
+                    
                     const img = new Image();
                     
+                    // 設置 crossOrigin 屬性以處理 CORS 問題
+                    img.crossOrigin = 'anonymous';
+                    
                     img.onload = () => {
-                        console.log('圖片預載成功:', url);
+                        console.log('✅ 圖片預載成功:', url);
                         resolve(url);
                     };
                     
                     img.onerror = (error) => {
-                        console.error('圖片預載失敗:', url, error);
+                        console.error('❌ 圖片預載失敗:', url, error);
+                        console.log('錯誤詳情:', {
+                            src: img.src,
+                            complete: img.complete,
+                            naturalWidth: img.naturalWidth,
+                            naturalHeight: img.naturalHeight
+                        });
                         reject(new Error(`無法載入圖片: ${url}`));
                     };
                     
                     // 設置超時
                     setTimeout(() => {
                         if (!img.complete) {
-                            console.warn('圖片載入超時:', url);
+                            console.warn('⏱️ 圖片載入超時:', url);
                             reject(new Error(`圖片載入超時: ${url}`));
                         }
-                    }, 10000); // 10秒超時
+                    }, 15000); // 增加到15秒
                     
                     img.src = url;
                 });
