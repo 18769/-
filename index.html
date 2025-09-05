@@ -247,7 +247,7 @@
                 }
                 // 如果是完整 URL
                 else if (selectedImage.startsWith('http')) {
-                    finalPath = basePath+selectedImage;
+                    finalPath = selectedImage;
                 }
                 // 如果是相對路徑，需要加上 basePath
                 else {
@@ -255,7 +255,7 @@
                     if (basePath && !basePath.endsWith('/')) {
                         finalPath = basePath + '/' + selectedImage;
                     } else {
-                        finalPath = basePath + selectedImage;
+                        finalPath = basePath +'/'+ selectedImage;
                     }
                 }
                 
