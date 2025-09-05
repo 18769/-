@@ -19,31 +19,30 @@ body {
 }
 
 /* ========================
-   佈局與容器
+   佈局與容器 - 滿版設計
    ======================== */
 
 #game-container {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 0;
+    margin: 0;
 }
 
-/* 遊戲UI主容器 - 關鍵改進 */
+/* 遊戲UI主容器 - 滿版佈局 */
 .game-ui {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    max-height: 100vh; /* 防止超出視窗 */
-    padding: 10px;
-    max-width: 800px;
-    margin: 0 auto;
+    max-height: 100vh;
+    padding: 8px;
     width: 100%;
-    gap: 8px; /* 縮小間距 */
-    overflow: hidden; /* 防止內容溢出 */
+    gap: 8px;
+    overflow: hidden;
 }
 
 /* 雙人模式專用樣式 */
@@ -51,18 +50,21 @@ body {
     gap: 6px;
 }
 
-/* 圖片容器 - 修正尺寸問題 */
+/* 圖片容器 - 滿版寬度，增加高度 */
 .image-container {
-    width: 100%;
-    flex: 1; /* 使用flex自適應空間 */
-    min-height: 150px;
-    max-height: 300px; /* 進一步限制最大高度 */
+    width: 100vw;
+    margin-left: calc(-8px);
+    margin-right: calc(-8px);
+    flex: 1;
+    min-height: 190px;
+    max-height: 400px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 8px 0;
+    margin-top: 8px;
+    margin-bottom: 8px;
     background: #f5f5f5;
-    border-radius: 8px;
+    border-radius: 0;
     overflow: hidden;
     position: relative;
 }
@@ -101,7 +103,7 @@ body {
 #restart-btn {
     border-radius: 12px;
     padding: 15px 30px;
-    font-size: 18px;
+    font-size: 25px;
     min-height: 60px;
     width: 100%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -117,7 +119,7 @@ body {
 
 /* 次要按鈕樣式 */
 .next-btn {
-    border-radius: 12px;
+    border-radius: 20px;
     border: 1px solid #ddd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     min-height: 60px;
@@ -167,13 +169,13 @@ body {
 .skip-btn {
     padding: 6px 10px;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
     width: 100%;
-    min-height: 36px; /* 縮小最小觸控目標 */
+    min-height: 36px;
 }
 
 .answer-btn {
@@ -225,15 +227,15 @@ body {
 /* 控制按鈕 - 進一步縮小尺寸 */
 .control-btn {
     padding: 6px 8px;
-    border-radius: 6px;
-    font-size: 11px;
+    border-radius: 10px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 3px;
     transition: all 0.2s;
-    min-width: 70px; /* 進一步縮小最小寬度 */
-    min-height: 32px; /* 進一步縮小最小高度 */
+    min-width: 100px;
+    min-height: 60px;
 }
 
 /* 團隊得分按鈕 - 修正被吃掉的問題 */
@@ -247,10 +249,10 @@ body {
     gap: 4px;
     transition: all 0.2s;
     flex: 1;
-    min-width: 120px; /* 確保足夠寬度 */
+    min-width: 120px;
     color: white;
     font-weight: bold;
-    min-height: 44px; /* 確保足夠高度 */
+    min-height: 44px;
 }
 
 .team-action-btn.red-team {
@@ -296,12 +298,15 @@ body {
    功能模組樣式 - 優化尺寸
    ======================== */
 
+/* 模式選擇頁面 - 滿版佈局適配 */
 .mode-selection {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
     width: 100%;
-    max-width: 500px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 /* 頂部資訊欄 - 縮小高度 */
@@ -311,7 +316,7 @@ body {
     align-items: center;
     padding: 6px 0;
     border-bottom: 1px solid #eee;
-    flex-shrink: 0; /* 不允許縮小 */
+    flex-shrink: 0;
 }
 
 .game-ui.multiplayer .header-bar {
@@ -333,8 +338,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-shrink: 0; /* 不允許縮小 */
-    font-size: 12px;
+    flex-shrink: 0;
+    font-size: 20px;
 }
 
 .level-title {
@@ -349,7 +354,7 @@ body {
 
 /* 分數顯示 - 縮小字體 */
 .timer, .score-display {
-    font-size: 18px;
+    font-size: 30px;
     font-weight: bold;
     color: #555;
 }
@@ -393,7 +398,7 @@ body {
     flex: 1;
     text-align: center;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
@@ -422,7 +427,7 @@ body {
 }
 
 .score-value {
-    font-size: 16px;
+    font-size: 30px;
     font-weight: bold;
 }
 
@@ -440,7 +445,7 @@ body {
     justify-content: space-between;
     gap: 10px;
     width: 100%;
-    flex-shrink: 0; /* 不允許縮小 */
+    flex-shrink: 0;
 }
 
 .game-controls, .game-actions {
@@ -454,19 +459,30 @@ body {
 .action-area {
     display: flex;
     flex-direction: column;
-    gap: 4px; /* 進一步縮小間距 */
+    gap: 4px;
     flex-shrink: 0;
 }
 
 .game-ui.multiplayer .game-controls {
     flex-direction: row;
     justify-content: center;
-    gap: 4px; /* 進一步縮小間距 */
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+/* 雙人模式的控制按鈕 - 拉長寬度 */
+.game-ui.multiplayer .control-btn {
+    flex: 1;
+    min-width: 240px;
+    max-width: 300px;
+    padding: 8px 10px;
+    font-size: 20px;
+    min-height: 36px;
 }
 
 .team-actions {
     display: flex;
-    gap: 12px; /* 確保足夠間距 */
+    gap: 12px;
     justify-content: center;
     width: 100%;
     padding: 0 10px;
@@ -480,6 +496,7 @@ body {
     gap: 20px;
     width: 100%;
     max-width: 500px;
+    margin: 0 auto;
     text-align: center;
 }
 
@@ -551,7 +568,8 @@ body {
     
     .image-container {
         max-height: 200px;
-        margin: 4px 0;
+        margin-left: calc(-5px);
+        margin-right: calc(-5px);
     }
 }
 
@@ -587,7 +605,8 @@ body {
     
     .image-container {
         max-height: 150px;
-        margin: 2px 0;
+        margin-left: calc(-5px);
+        margin-right: calc(-5px);
     }
 }
 
@@ -608,8 +627,13 @@ body {
     
     .control-btn {
         padding: 12px 20px;
-        font-size: 15px;
-        min-height: 48px;
+        font-size: 30px;
+        min-height: 60px;
+    }
+    
+    .image-container {
+        margin-left: calc(-20px);
+        margin-right: calc(-20px);
     }
 }
 
@@ -694,7 +718,8 @@ body {
     }
 
     .image-container {
-        margin: 8px 0;
+        margin-top: 8px;
+        margin-bottom: 8px;
         min-height: 150px;
         max-height: 250px;
     }

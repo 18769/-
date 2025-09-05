@@ -282,7 +282,7 @@
                 this.state = GameState.INIT;
                 const container = document.getElementById('game-container');
                 container.innerHTML = `
-                    <h1 style="margin-bottom: 30px; font-size: 32px;">迎新遊戲</h1>
+                    <h1 style="margin-bottom: 30px; font-size: 32px;"><Center>迎新遊戲</Center></h1>
                     <div class="mode-selection">
                         <button class="mode-btn" data-mode="${GameMode.GRole}">猜人物</button>
                         <button class="mode-btn" data-mode="${GameMode.GBrand}">猜品牌</button>
@@ -580,6 +580,7 @@
                 
                 // 更新按鈕狀態
                 this.updateAnswerButton();
+                document.getElementById('reTime-btn').style.visibility = 'hidden';
             }
 
              getCategoryName(category) {

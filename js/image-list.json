@@ -250,7 +250,6 @@
   "猜品牌/品牌猜不同": {
     "questions": [
       "/images/game/猜品牌/品牌猜不同/Canon(右上).png",
-      "/images/game/猜品牌/品牌猜不同/Galaxy(左上).png",
       "/images/game/猜品牌/品牌猜不同/Google(右上).png",
       "/images/game/猜品牌/品牌猜不同/Intel(左上).png",
       "/images/game/猜品牌/品牌猜不同/Line(左上).png",
@@ -258,6 +257,7 @@
       "/images/game/猜品牌/品牌猜不同/Photoshop(左下).png",
       "/images/game/猜品牌/品牌猜不同/TikTok(右下).png",
       "/images/game/猜品牌/品牌猜不同/Uber(左下).png",
+      "/images/game/猜品牌/品牌猜不同/三星(左上).png",
       "/images/game/猜品牌/品牌猜不同/勞力士(右上).png",
       "/images/game/猜品牌/品牌猜不同/勞力士(左下).png",
       "/images/game/猜品牌/品牌猜不同/可口可樂(左上).png",
@@ -265,33 +265,20 @@
       "/images/game/猜品牌/品牌猜不同/鳴潮(右下).png"
     ],
     "answers": {
-      "intel ans(左上)": "/images/game/猜品牌/品牌猜不同/解答/intel ans(左上).jpg",
-      "intel": "/images/game/猜品牌/品牌猜不同/解答/intel.jpg",
-      "line ans(左上)": "/images/game/猜品牌/品牌猜不同/解答/line ans(左上).jpg",
-      "line": "/images/game/猜品牌/品牌猜不同/解答/line.jpg",
-      "PS ans(左下)": "/images/game/猜品牌/品牌猜不同/解答/PS ans(左下).jpg",
-      "PS": "/images/game/猜品牌/品牌猜不同/解答/PS.jpg",
-      "uber ans(左下)": "/images/game/猜品牌/品牌猜不同/解答/uber ans(左下).jpg",
-      "uber": "/images/game/猜品牌/品牌猜不同/解答/uber.jpg",
-      "三星": "/images/game/猜品牌/品牌猜不同/解答/三星.jpg",
-      "三星ans(左上)": "/images/game/猜品牌/品牌猜不同/解答/三星ans(左上).jpg",
-      "勞力士(1)": "/images/game/猜品牌/品牌猜不同/解答/勞力士(1).jpg",
-      "勞力士": "/images/game/猜品牌/品牌猜不同/解答/勞力士.jpg",
-      "勞力士ans(右上)": "/images/game/猜品牌/品牌猜不同/解答/勞力士ans(右上).jpg",
-      "勞力士ans(左下)": "/images/game/猜品牌/品牌猜不同/解答/勞力士ans(左下).jpg",
-      "可口可樂": "/images/game/猜品牌/品牌猜不同/解答/可口可樂.jpg",
-      "可口可樂ans(左上)": "/images/game/猜品牌/品牌猜不同/解答/可口可樂ans(左上).jpg",
-      "抖音": "/images/game/猜品牌/品牌猜不同/解答/抖音.jpg",
-      "抖音ans(右下)": "/images/game/猜品牌/品牌猜不同/解答/抖音ans(右下).jpg",
-      "百事": "/images/game/猜品牌/品牌猜不同/解答/百事.jpg",
-      "百事ans(左上)": "/images/game/猜品牌/品牌猜不同/解答/百事ans(左上).jpg",
-      "網飛": "/images/game/猜品牌/品牌猜不同/解答/網飛.jpg",
-      "網飛ans(左下)": "/images/game/猜品牌/品牌猜不同/解答/網飛ans(左下).jpg",
-      "谷哥": "/images/game/猜品牌/品牌猜不同/解答/谷哥.jpg",
-      "谷歌ans(右上)": "/images/game/猜品牌/品牌猜不同/解答/谷歌ans(右上).jpg",
-      "首頁": "/images/game/猜品牌/品牌猜不同/解答/首頁.jpg",
-      "鳴潮": "/images/game/猜品牌/品牌猜不同/解答/鳴潮.jpg",
-      "鳴潮ans(右下)": "/images/game/猜品牌/品牌猜不同/解答/鳴潮ans(右下).jpg"
+      "Canon(右上)": "/images/game/猜品牌/品牌猜不同/解答/Canon(右上).png",
+      "Google(右上)": "/images/game/猜品牌/品牌猜不同/解答/Google(右上).jpg",
+      "Intel(左上)": "/images/game/猜品牌/品牌猜不同/解答/Intel(左上).jpg",
+      "Line(左上)": "/images/game/猜品牌/品牌猜不同/解答/Line(左上).jpg",
+      "Netflix(左下)": "/images/game/猜品牌/品牌猜不同/解答/Netflix(左下).jpg",
+      "Photoshop(左下)": "/images/game/猜品牌/品牌猜不同/解答/Photoshop(左下).jpg",
+      "TikTok(右下)": "/images/game/猜品牌/品牌猜不同/解答/TikTok(右下).jpg",
+      "Uber(左下)": "/images/game/猜品牌/品牌猜不同/解答/Uber(左下).jpg",
+      "三星(左上)": "/images/game/猜品牌/品牌猜不同/解答/三星(左上).jpg",
+      "勞力士(右上)": "/images/game/猜品牌/品牌猜不同/解答/勞力士(右上).jpg",
+      "勞力士(左下)": "/images/game/猜品牌/品牌猜不同/解答/勞力士(左下).jpg",
+      "可口可樂(左上)": "/images/game/猜品牌/品牌猜不同/解答/可口可樂(左上).jpg",
+      "百事(左上)": "/images/game/猜品牌/品牌猜不同/解答/百事(左上).jpg",
+      "鳴潮(右下)": "/images/game/猜品牌/品牌猜不同/解答/鳴潮(右下).jpg"
     }
   },
   "猜品牌/子品牌猜源品牌": {
@@ -317,7 +304,7 @@
       "Toyota": "/images/game/猜品牌/子品牌猜源品牌/解答/Toyota.jpg",
       "光泉": "/images/game/猜品牌/子品牌猜源品牌/解答/光泉.jpg",
       "大同": "/images/game/猜品牌/子品牌猜源品牌/解答/大同.jpg",
-      "統一ans": "/images/game/猜品牌/子品牌猜源品牌/解答/統一ans.jpg",
+      "統一": "/images/game/猜品牌/子品牌猜源品牌/解答/統一.jpg",
       "首頁": "/images/game/猜品牌/子品牌猜源品牌/解答/首頁.jpg"
     }
   },
