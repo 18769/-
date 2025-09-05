@@ -98,7 +98,7 @@
                     const pathParts = pathname.split('/').filter(part => part);
                     if (pathParts.length > 0) {
                         // 返回 /repository-name
-                        return '/' + pathParts[0]; 
+                        return '/' + pathParts[0]+'/'+pathParts[1]; 
                     }
                 }
                 
