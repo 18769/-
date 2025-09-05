@@ -81,31 +81,48 @@
                 this.currentQuestionPath = '';
                 this.answerButtonEnabled = false;
 
-
                 // 初始化遊戲
                 this.initPage();
             }
 
-            // 獲取基礎路徑 - 自動檢測環境
+            // 獲取基礎路徑 - 修正後的版本
             getBasePath() {
-                // 檢查是否在 GitHub Pages 環境
-                if (window.location.hostname.includes('github.io')) {
-                    // GitHub Pages 需要包含倉庫名稱
-                    const pathParts = window.location.pathname.split('/').filter(part => part);
+                const hostname = window.location.hostname;
+                const pathname = window.location.pathname;
+                
+                console.log('當前 hostname:', hostname);
+                console.log('當前 pathname:', pathname);
+                
+                // GitHub Pages 檢測
+                if (hostname.includes('github.io')) {
+                    // GitHub Pages URL 格式: https://username.github.io/repository-name/
+                    const pathParts = pathname.split('/').filter(part => part);
                     if (pathParts.length > 0) {
-                        return '/' + pathParts[0]; // 倉庫名稱
+                        const repoName = pathParts[0];
+                        console.log('檢測到 GitHub Pages，倉庫名稱:', repoName);
+                        return '/' + repoName;
                     }
                 }
-                return ''; // 本地開發環境或根域名
+                
+                // 本地環境或其他環境
+                console.log('本地環境或根域名');
+                return '';
             }
 
             async loadImageList() {
+                const basePath = this.getBasePath();
+                
+                // 建構 JSON 路徑時需要確保正確格式
+                let jsonPath;
+                if (basePath) {
+                    jsonPath = `${basePath}/js/image-list.json`;
+                } else {
+                    jsonPath = './js/image-list.json';
+                }
+                
+                console.log('嘗試載入圖片列表:', jsonPath);
+                
                 try {
-                    const basePath = this.getBasePath();
-                    const jsonPath = `${basePath}/js/image-list.json`;
-                    
-                    console.log('嘗試載入圖片列表:', jsonPath);
-                    
                     const response = await fetch(jsonPath);
                     
                     if (!response.ok) {
@@ -113,7 +130,9 @@
                     }
                     
                     const data = await response.json();
-                    this.imageList = data;
+                    
+                    // 處理載入的資料，確保所有路徑都是絕對路徑
+                    this.imageList = this.processImageListPaths(data, basePath);
                     
                     console.log('圖片列表載入完成:', this.imageList);
                     
@@ -136,46 +155,96 @@
                 }
             }
 
+            // 處理圖片列表路徑
+            processImageListPaths(data, basePath) {
+                const processedData = {};
+                
+                for (const [folder, content] of Object.entries(data)) {
+                    if (Array.isArray(content)) {
+                        // 舊格式
+                        processedData[folder] = content.map(path => this.ensureAbsolutePath(path, basePath));
+                    } else if (content.questions) {
+                        // 新格式
+                        processedData[folder] = {
+                            questions: content.questions.map(path => this.ensureAbsolutePath(path, basePath)),
+                            answers: {}
+                        };
+                        
+                        // 處理解答路徑
+                        for (const [key, answerPath] of Object.entries(content.answers || {})) {
+                            processedData[folder].answers[key] = this.ensureAbsolutePath(answerPath, basePath);
+                        }
+                    }
+                }
+                
+                return processedData;
+            }
+
+            // 確保路徑是絕對路徑
+            ensureAbsolutePath(imagePath, basePath) {
+                // 如果已經是完整的 URL，直接返回
+                if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+                    return imagePath;
+                }
+                
+                // 如果路徑已經包含 basePath，直接返回
+                if (basePath && imagePath.startsWith(basePath)) {
+                    return imagePath;
+                }
+                
+                // 處理相對路徑
+                if (imagePath.startsWith('./')) {
+                    imagePath = imagePath.substring(2);
+                }
+                
+                // 確保路徑以 / 開頭
+                if (!imagePath.startsWith('/')) {
+                    imagePath = '/' + imagePath;
+                }
+                
+                // 添加 basePath
+                return basePath + imagePath;
+            }
+
             // 備用圖片列表
             getDefaultImageList() {
                 const basePath = this.getBasePath();
                 return {
                     "猜人物/照片猜人物": [
-                        `${basePath}/images/default.jpg`,
-                        `${basePath}/images/placeholder1.jpg`,
-                        `${basePath}/images/placeholder2.jpg`
+                        this.ensureAbsolutePath('/images/default.jpg', basePath),
+                        this.ensureAbsolutePath('/images/placeholder1.jpg', basePath),
+                        this.ensureAbsolutePath('/images/placeholder2.jpg', basePath)
                     ],
                     "猜人物/擷取照片猜人物": [
-                        `${basePath}/images/default.jpg`
+                        this.ensureAbsolutePath('/images/default.jpg', basePath)
                     ],
                     "猜人物/場景猜人物": [
-                        `${basePath}/images/default.jpg`
+                        this.ensureAbsolutePath('/images/default.jpg', basePath)
                     ],
                     "猜作品/人物猜作品": [
-                        `${basePath}/images/default.jpg`
+                        this.ensureAbsolutePath('/images/default.jpg', basePath)
                     ],
                     "猜品牌/猜品牌": [
-                        `${basePath}/images/default.jpg`
+                        this.ensureAbsolutePath('/images/default.jpg', basePath)
                     ],
                     "猜品牌/猜正版品牌": [
-                        `${basePath}/images/default.jpg`
+                        this.ensureAbsolutePath('/images/default.jpg', basePath)
                     ],
                     "猜品牌/子品牌猜源品牌": [
-                        `${basePath}/images/default.jpg`
+                        this.ensureAbsolutePath('/images/default.jpg', basePath)
                     ],
                     "猜品牌/品牌猜不同": [
-                        `${basePath}/images/default.jpg`
+                        this.ensureAbsolutePath('/images/default.jpg', basePath)
                     ]
                 };
             }
 
             getDefaultImage() {
                 const basePath = this.getBasePath();
-                return `${basePath}/images/default.jpg`;
+                return this.ensureAbsolutePath('/images/default.jpg', basePath);
             }
 
             getRandomImage(category) {
-                const basePath = this.getBasePath();
                 const folder = this.categoryFolders[category];
                 
                 console.log('目標分類:', category);
@@ -214,7 +283,8 @@
                 // 如果所有圖片都顯示過了，顯示「題庫已完」圖片
                 if (unshownImages.length === 0) {
                     console.log('題庫已完，顯示結束圖片');
-                    return `${basePath}/images/題庫已完.jpg`;
+                    const basePath = this.getBasePath();
+                    return this.ensureAbsolutePath('/images/題庫已完.jpg', basePath);
                 }
                 
                 // 隨機選擇一張圖片
@@ -227,22 +297,8 @@
                 console.log(`已顯示圖片數量: ${this.displayedImages.size}/${availableImages.length}`);
                 console.log('選中的圖片路徑:', selectedImage);
                 
-                // 處理路徑格式
-                let finalPath = selectedImage;
-                
-                // 如果路徑已經是完整的（以 / 開頭），直接使用
-                if (selectedImage.startsWith('/')) {
-                    finalPath = selectedImage;
-                } 
-                // 如果是相對路徑，加上 basePath
-                else if (!selectedImage.startsWith('http')) {
-                    finalPath = basePath + (selectedImage.startsWith('/') ? '' : '/') + selectedImage;
-                }
-                
-                console.log('最終圖片路徑:', finalPath);
-                return finalPath;
+                return selectedImage;
             }
-
 
             preloadImage(url) {
                 return new Promise((resolve, reject) => {
