@@ -183,7 +183,6 @@
   "猜人物/照片猜人物": {
     "questions": [
       "/images/game/猜人物/照片猜人物/Cinderella.png",
-      "/images/game/猜人物/照片猜人物/knuckles.png",
       "/images/game/猜人物/照片猜人物/ku.jpg",
       "/images/game/猜人物/照片猜人物/MJ.jpeg",
       "/images/game/猜人物/照片猜人物/MJ.jpg",
@@ -242,7 +241,6 @@
       "/images/game/猜人物/照片猜人物/高飛.png",
       "/images/game/猜人物/照片猜人物/魯迅.jpg",
       "/images/game/猜人物/照片猜人物/鳥哥.jpg",
-      "/images/game/猜人物/照片猜人物/麗莎麗莎.jpg",
       "/images/game/猜人物/照片猜人物/黑龍.jpg"
     ],
     "answers": {}
