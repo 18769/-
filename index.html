@@ -413,8 +413,8 @@
                 document.getElementById('answer-btn').addEventListener('click', () => {
                     this.score.player1 += 1;
                     document.getElementById('score').textContent = this.score.player1;
-                    if (this.score.player1 > 45 && isBonus == false) {
-                    // 如果分數超過 29，顯示額外分數按鈕
+                    if (this.score.player1 > 40 && isBonus == false) {
+                    // 如果分數超過 40，顯示額外分數按鈕
                     bonusActionDiv.style.visibility = 'visible';
                     isBonus = true;
                     }
@@ -655,12 +655,12 @@
             // 獲取當前題目類別
              getCurrentCategory() {
                 if (this.currentMode === GameMode.GRole) {
-                    if (this.condition(360,26))
+                    if (this.condition(360,21))
                         return GameCategory.GUESS_CHARACTER; // 6分鐘
-                    else if (this.condition(540,36))
-                        return GameCategory.GUESS_CHARACTER_CROPPED; // 9分鐘和25分
-                    else if (this.condition(720,46))
-                        return GameCategory.GUESS_CHARACTER_SCENE; // 12分鐘和35分
+                    else if (this.condition(540,31))
+                        return GameCategory.GUESS_CHARACTER_CROPPED; // 9分鐘和30分
+                    else if (this.condition(720,41))
+                        return GameCategory.GUESS_CHARACTER_SCENE; // 12分鐘和40分
                     else
                         return GameCategory.GUESS_WORK_BY_CHARACTER; // 45分
                 } else {
