@@ -314,61 +314,52 @@
 
             // 初始化頁面
             initPage() {
-                this.state = GameState.INIT;
-                const container = document.getElementById('game-container');
-                container.innerHTML = `
-                    <div class="init-container">
-                        <h1 style="margin-bottom: 30px; font-size: 32px;">迎新遊戲</h1>
-                        
-                        <!-- Lock/Unlock 開關 -->
-                        <div class="lock-control">
-                            <label class="switch">
-                                <input type="checkbox" id="lock-toggle" checked>
-                                <span class="slider round"></span>
-                            </label>
-                            <span class="lock-label" id="lock-label">🔒 鎖定模式（開啟）</span>
-                            <div class="lock-description">防止意外跳關，開啟時會確認是否加分</div>
-                        </div>
-                        
-                        <!-- 模式選擇 -->
-                        <div class="mode-selection">
-                            <button class="mode-btn" data-mode="${GameMode.GRole}">猜人物</button>
-                            <button class="mode-btn" data-mode="${GameMode.GBrand}">猜品牌</button>
-                        </div>
-                        
-                        <!-- 遊戲說明 -->
-                        <div class="game-instructions">
-                            <h3>遊戲說明：</h3>
-                            <ul>
-                                <li>🔒 <strong>鎖定模式</strong>：開啟時，跳關前會確認是否已加分</li>
-                                <li>🔓 <strong>解鎖模式</strong>：關閉時，可以直接跳關不加分</li>
-                                <li>🎯 請確保在跳關前為正確的隊伍加分</li>
-                            </ul>
-                        </div>
+            this.state = GameState.INIT;
+            const container = document.getElementById('game-container');
+            container.innerHTML = `
+                <div class="init-container">
+                    <h1 style="margin-bottom: 30px; font-size: 32px;">迎新遊戲</h1>
+                    
+                    <!-- Lock/Unlock 開關 -->
+                    <div class="lock-control">
+                        <label class="switch">
+                            <input type="checkbox" id="lock-toggle" ${this.lockMode ? 'checked' : ''}>
+                            <span class="slider round"></span>
+                        </label>
+                        <span class="lock-label" id="lock-label">
+                            ${this.lockMode ? '🔒 鎖定模式（開啟）' : '🔓 解鎖模式（關閉）'}
+                        </span>
+                        <div class="lock-description">防止意外跳關，開啟時會確認是否加分</div>
                     </div>
-                `;
-                
-                // 設置 Lock/Unlock 開關事件
-                const lockToggle = document.getElementById('lock-toggle');
-                const lockLabel = document.getElementById('lock-label');
-                
-                lockToggle.addEventListener('change', (e) => {
-                    this.lockMode = e.target.checked;
-                    lockLabel.textContent = this.lockMode 
-                        ? '🔒 鎖定模式（開啟）' 
-                        : '🔓 解鎖模式（關閉）';
-                    console.log(`鎖定模式: ${this.lockMode ? '開啟' : '關閉'}`);
+                    
+                    <!-- 模式選擇 -->
+                    <div class="mode-selection">
+                        <button class="mode-btn" data-mode="${GameMode.GRole}">猜人物</button>
+                        <button class="mode-btn" data-mode="${GameMode.GBrand}">猜品牌</button>
+                    </div>
+                </div>
+            `;
+            
+            // 設置 Lock/Unlock 開關事件
+            const lockToggle = document.getElementById('lock-toggle');
+            const lockLabel = document.getElementById('lock-label');
+            
+            lockToggle.addEventListener('change', (e) => {
+                this.lockMode = e.target.checked;
+                lockLabel.textContent = this.lockMode 
+                    ? '🔒 鎖定模式（開啟）' 
+                    : '🔓 解鎖模式（關閉）';
+                console.log(`鎖定模式: ${this.lockMode ? '開啟' : '關閉'}`);
+            });
+            
+            // 模式選擇按鈕事件
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    this.currentMode = parseInt(e.target.dataset.mode);
+                    this.startGame();
                 });
-                
-                // 模式選擇按鈕事件
-                document.querySelectorAll('.mode-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        this.currentMode = parseInt(e.target.dataset.mode);
-                        this.startGame();
-                    });
-                });
-                
-            }
+            });
+        }
 
             // 開始遊戲
             startGame() {
