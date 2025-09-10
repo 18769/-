@@ -225,46 +225,74 @@
                     return this.getDefaultImage();
                 }
                 
+                console.log('可用圖片數量:', availableImages.length);
+                
                 if (availableImages.length === 0) {
                     return this.getDefaultImage();
                 }
                 
-                const unshownImages = availableImages.filter(
-                    imagePath => !this.displayedImages.has(imagePath)
-                );
+                // 關鍵修正：統一使用標準化路徑進行比對
+                const unshownImages = availableImages.filter(imagePath => {
+                    const normalizedPath = this.normalizeImagePath(imagePath, basePath);
+                    return !this.displayedImages.has(normalizedPath);
+                });
+                
+                console.log('未顯示圖片數量:', unshownImages.length);
                 
                 if (unshownImages.length === 0) {
+                    console.log('題庫已完，顯示結束圖片');
                     return `${basePath}/images/題庫已完.jpg`;
                 }
                 
                 const randomIndex = Math.floor(Math.random() * unshownImages.length);
                 const selectedImage = unshownImages[randomIndex];
                 
-                this.displayedImages.add(selectedImage);
+                // 關鍵修正：儲存標準化後的路徑
+                const normalizedSelectedPath = this.normalizeImagePath(selectedImage, basePath);
+                this.displayedImages.add(normalizedSelectedPath);
                 
-                // 修正路徑處理邏輯
-                let finalPath = selectedImage;
+                console.log('已顯示圖片總數:', this.displayedImages.size);
+                console.log('選擇的圖片:', selectedImage);
                 
-                // 如果圖片路徑已經是絕對路徑（以 / 開頭）
-                if (selectedImage.startsWith('/')) {
-                    finalPath = basePath+selectedImage;
-                }
-                // 如果是完整 URL
-                else if (selectedImage.startsWith('http')) {
-                    finalPath = selectedImage;
-                }
-                // 如果是相對路徑，需要加上 basePath
-                else {
-                    // 確保路徑正確拼接
-                    if (basePath && !basePath.endsWith('/')) {
-                        finalPath = basePath + '/' + selectedImage;
-                    } else {
-                        finalPath = basePath + selectedImage;
-                    }
+                return this.formatImagePath(selectedImage, basePath);
+            }
+
+            // 新增：標準化圖片路徑方法
+            normalizeImagePath(imagePath, basePath) {
+                let path = imagePath;
+                
+                // 移除 basePath 前綴（如果存在）
+                if (basePath && path.startsWith(basePath)) {
+                    path = path.substring(basePath.length);
                 }
                 
-                console.log('最終圖片路徑:', finalPath);
-                return finalPath;
+                // 確保路徑以 / 開頭
+                if (!path.startsWith('/')) {
+                    path = '/' + path;
+                }
+                
+                // 統一轉為小寫（避免大小寫問題）
+                return path.toLowerCase();
+            }
+
+            // 新增：格式化最終圖片路徑
+            formatImagePath(imagePath, basePath) {
+                // 如果已經是完整 URL，直接返回
+                if (imagePath.startsWith('http')) {
+                    return imagePath;
+                }
+                
+                // 如果已經是絕對路徑，加上 basePath
+                if (imagePath.startsWith('/')) {
+                    return basePath + imagePath;
+                }
+                
+                // 相對路徑，確保正確拼接
+                if (basePath.endsWith('/')) {
+                    return basePath + imagePath;
+                } else {
+                    return basePath + '/' + imagePath;
+                }
             }
 
             preloadImage(url) {
@@ -641,7 +669,6 @@
                 
                 const category = this.getCurrentCategory();
                 this.level++;
-                this.currentQuestionPath = this.getRandomImage(category);
                 this.showLevelImage(category);
                 this.startLevelTimer();
                 this.updateLevelInfo();
