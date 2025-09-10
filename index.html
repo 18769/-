@@ -645,6 +645,7 @@
                 this.showLevelImage(category);
                 this.startLevelTimer();
                 this.updateLevelInfo();
+                if(this.currentMode==GameMode.GRole)
                 document.getElementById('reTime-btn').style.visibility = 'hidden';
 
 
@@ -953,7 +954,7 @@
                     }
                     
                     // 尋找對應的解答
-                    const answerPath = this.getBasePath()+'/' + folderData.answers[fileName];
+                    const answerPath = this.getBasePath() + folderData.answers[fileName];
                     console.log('找到的解答路徑:', answerPath);
                     
                     if (!answerPath) {
@@ -1016,15 +1017,25 @@
                 const updateLevelTimer = () => {
                     this.levelTimer += 1;
                     var iSretime =false;
-                    const reTimeBTN = document.getElementById('reTime-btn');
+                    if(this.currentMode==GameMode.GRole){
+                        const reTimeBTN = document.getElementById('reTime-btn');
 
-                    if(this.levelTimer<=10){
-                        document.getElementById('level-timer').textContent = this.levelTimer+"秒";
-                        if(iSretime==true){reTimeBTN.style.visibility = 'hidden';iSretime=false}
+                        if(this.levelTimer<=10){
+                            document.getElementById('level-timer').textContent = this.levelTimer+"秒";
+                            if(iSretime==true){reTimeBTN.style.visibility = 'hidden';iSretime=false}
+                        }
+                        else{
+                            document.getElementById('level-timer').textContent = this.levelTimer+"秒  時間到";
+                            if(iSretime==false){reTimeBTN.style.visibility = 'visible';iSretime=true}
+                        }
                     }
                     else{
-                        document.getElementById('level-timer').textContent = this.levelTimer+"秒  時間到";
-                        if(iSretime==false){reTimeBTN.style.visibility = 'visible';iSretime=true}
+                        if(this.levelTimer<=10){
+                            document.getElementById('level-timer').textContent = this.levelTimer+"秒";
+                        }
+                        else{
+                            document.getElementById('level-timer').textContent = this.levelTimer+"秒  時間到";
+                        }
                     }
                 };
                 
