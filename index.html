@@ -774,11 +774,11 @@
             // 獲取當前題目類別
              getCurrentCategory() {
                 if (this.currentMode === GameMode.GRole) {
-                    if (this.condition(360,21))
+                    if (this.condition(360,16))
                         return GameCategory.GUESS_CHARACTER; // 6分鐘
-                    else if (this.condition(540,31))
+                    else if (this.condition(540,26))
                         return GameCategory.GUESS_CHARACTER_CROPPED; // 9分鐘和30分
-                    else if (this.condition(720,41))
+                    else if (this.condition(720,36))
                         return GameCategory.GUESS_CHARACTER_SCENE; // 12分鐘和40分
                     else
                         return GameCategory.GUESS_WORK_BY_CHARACTER; // 45分
